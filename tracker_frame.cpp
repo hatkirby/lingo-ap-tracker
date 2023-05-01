@@ -1,7 +1,11 @@
 #include "tracker_frame.h"
 
+#include "tracker_panel.h"
+
 TrackerFrame::TrackerFrame()
     : wxFrame(nullptr, wxID_ANY, "Lingo Archipelago Tracker") {
+  ::wxInitAllImageHandlers();
+
   wxMenu *menuFile = new wxMenu();
   menuFile->Append(wxID_EXIT);
 
@@ -19,6 +23,8 @@ TrackerFrame::TrackerFrame()
 
   Bind(wxEVT_MENU, &TrackerFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &TrackerFrame::OnExit, this, wxID_EXIT);
+
+  new TrackerPanel(this);
 }
 
 void TrackerFrame::OnAbout(wxCommandEvent &event) {

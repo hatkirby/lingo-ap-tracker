@@ -9,6 +9,7 @@ include(${wxWidgets_USE_FILE})
 add_executable(lingo_ap_tracker
   main.cpp
   tracker_frame.cpp
+  tracker_panel.cpp
 )
 set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD 17)
 set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD_REQUIRED ON)
