@@ -34,7 +34,7 @@ GameData::GameData() {
   YAML::Node lingo_config = YAML::LoadFile("assets/LL1.yaml");
   YAML::Node areas_config = YAML::LoadFile("assets/areas.yaml");
 
-  rooms_.reserve(lingo_config.size() + 1);  // The +1 is for Menu
+  rooms_.reserve(lingo_config.size() * 2);
 
   for (const auto &room_it : lingo_config) {
     int room_id = AddOrGetRoom(room_it.first.as<std::string>());
@@ -183,6 +183,10 @@ GameData::GameData() {
           door_obj.skip_location = door_it.second["skip_location"].as<bool>();
         }
 
+        if (door_it.second["event"]) {
+          door_obj.skip_location = door_it.second["event"].as<bool>();
+        }
+
         if (door_it.second["item_name"]) {
           door_obj.item_name = door_it.second["item_name"].as<std::string>();
         } else if (!door_it.second["skip_item"] && !door_it.second["event"]) {
@@ -232,6 +236,52 @@ GameData::GameData() {
           AddOrGetArea(area_it.second["fold_into"].as<std::string>());
     }
   }
+
+  for (const Panel &panel : panels_) {
+    if (panel.check) {
+      int room_id = panel.room;
+      std::string room_name = rooms_[room_id].name;
+
+      std::string area_name = room_name;
+      if (fold_areas.count(room_name)) {
+        int fold_area_id = fold_areas[room_name];
+        area_name = map_areas_[fold_area_id].name;
+      }
+
+      int area_id = AddOrGetArea(area_name);
+      MapArea &map_area = map_areas_[area_id];
+      // room field should be the original room ID
+      map_area.locations.push_back(
+          {.name = panel.name, .room = panel.room, .panels = {panel.id}});
+    }
+  }
+
+  for (const Door &door : doors_) {
+    if (!door.skip_location) {
+      int room_id = door.room;
+      std::string area_name = rooms_[room_id].name;
+      std::string section_name;
+
+      size_t divider_pos = door.location_name.find(" - ");
+      if (divider_pos == std::string::npos) {
+        section_name = door.location_name;
+      } else {
+        area_name = door.location_name.substr(0, divider_pos);
+        section_name = door.location_name.substr(divider_pos + 3);
+      }
+
+      if (fold_areas.count(area_name)) {
+        int fold_area_id = fold_areas[area_name];
+        area_name = map_areas_[fold_area_id].name;
+      }
+
+      int area_id = AddOrGetArea(area_name);
+      MapArea &map_area = map_areas_[area_id];
+      // room field should be the original room ID
+      map_area.locations.push_back(
+          {.name = section_name, .room = door.room, .panels = door.panels});
+    }
+  }
 }
 
 int GameData::AddOrGetRoom(std::string room) {
@@ -258,8 +308,10 @@ int GameData::AddOrGetPanel(std::string room, std::string panel) {
   std::string full_name = room + " - " + panel;
 
   if (!panel_by_id_.count(full_name)) {
-    panel_by_id_[full_name] = panels_.size();
-    panels_.push_back({.name = panel, .room = AddOrGetRoom(room)});
+    int panel_id = panels_.size();
+    panel_by_id_[full_name] = panel_id;
+    panels_.push_back(
+        {.id = panel_id, .name = panel, .room = AddOrGetRoom(room)});
   }
 
   return panel_by_id_[full_name];
@@ -267,9 +319,9 @@ int GameData::AddOrGetPanel(std::string room, std::string panel) {
 
 int GameData::AddOrGetArea(std::string area) {
   if (!area_by_id_.count(area)) {
-    area_by_id_[area] = map_areas_.size();
-    map_areas_.push_back(
-        {.id = static_cast<int>(map_areas_.size()), .name = area});
+    int area_id = map_areas_.size();
+    area_by_id_[area] = area_id;
+    map_areas_.push_back({.id = area_id, .name = area});
   }
 
   return area_by_id_[area];

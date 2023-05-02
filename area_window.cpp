@@ -25,6 +25,11 @@ void AreaWindow::OnPaint(wxPaintEvent& event) {
 
 void AreaWindow::OnEnterWindow(wxMouseEvent& event) {
   std::cout << GetGameData().GetMapArea(area_id_).name << std::endl;
+  std::cout << "---" << std::endl;
+  for (const Location& loc : GetGameData().GetMapArea(area_id_).locations) {
+    std::cout << loc.name << std::endl;
+  }
+  std::cout << "---" << std::endl;
 }
 
 void AreaWindow::Redraw() {

@@ -19,6 +19,7 @@ enum class LingoColor {
 };
 
 struct Panel {
+  int id;
   int room;
   std::string name;
   std::vector<LingoColor> colors;
@@ -51,7 +52,7 @@ struct Room {
 
 struct Location {
   std::string name;
-  int location_id;
+  int location_id = -1;
   int room;
   std::vector<int> panels;
 };
