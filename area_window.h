@@ -21,6 +21,8 @@ class AreaWindow : public wxWindow {
 
   AreaPopup* GetPopup() { return popup_; }
 
+  void UpdateIndicators();
+
  private:
   void OnPaint(wxPaintEvent& event);
   void OnEnterWindow(wxMouseEvent& event);

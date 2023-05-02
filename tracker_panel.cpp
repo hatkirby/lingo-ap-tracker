@@ -13,6 +13,7 @@ TrackerPanel::TrackerPanel(wxWindow *parent) : wxPanel(parent, wxID_ANY) {
     AreaPopup *area_popup = new AreaPopup(this, map_area.id);
     area_popup->SetPosition({0, 0});
     area_popup->Raise();
+    area_popups_.push_back(area_popup);
 
     AreaWindow *area_window = new AreaWindow(this, map_area.id, area_popup);
     area_window->Lower();
@@ -22,6 +23,18 @@ TrackerPanel::TrackerPanel(wxWindow *parent) : wxPanel(parent, wxID_ANY) {
   Redraw();
 
   Bind(wxEVT_PAINT, &TrackerPanel::OnPaint, this);
+}
+
+void TrackerPanel::UpdateIndicators() {
+  Redraw();
+
+  for (AreaWindow *area_window : area_windows_) {
+    area_window->UpdateIndicators();
+  }
+
+  for (AreaPopup *area_popup : area_popups_) {
+    area_popup->UpdateIndicators();
+  }
 }
 
 void TrackerPanel::OnPaint(wxPaintEvent &event) {

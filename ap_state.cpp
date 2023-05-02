@@ -8,6 +8,8 @@
 #include <list>
 #include <thread>
 
+#include "game_data.h"
+
 constexpr int AP_MAJOR = 0;
 constexpr int AP_MINOR = 4;
 constexpr int AP_REVISION = 0;
@@ -64,7 +66,7 @@ void APState::Connect(std::string server, std::string player,
           std::cout << "Location: " << location_id << std::endl;
         }
 
-        tracker_frame_->Refresh();
+        RefreshTracker();
       });
 
   apclient_->set_slot_disconnected_handler([&]() {
@@ -84,7 +86,7 @@ void APState::Connect(std::string server, std::string player,
           std::cout << "Item: " << item.item << std::endl;
         }
 
-        tracker_frame_->Refresh();
+        RefreshTracker();
       });
 
   apclient_->set_slot_connected_handler([&](const nlohmann::json& slot_data) {
@@ -151,10 +153,39 @@ void APState::Connect(std::string server, std::string player,
     interval--;
   }
 
-  if (!connected) {
+  if (connected) {
+    for (const MapArea& map_area : GetGameData().GetMapAreas()) {
+      for (int section_id = 0; section_id < map_area.locations.size();
+           section_id++) {
+        const Location& location = map_area.locations.at(section_id);
+
+        int64_t ap_id = apclient_->get_location_id(location.ap_location_name);
+        if (ap_id == APClient::INVALID_NAME_ID) {
+          std::cout << "Could not find AP location ID for "
+                    << location.ap_location_name << std::endl;
+        } else {
+          ap_id_by_location_id_[{map_area.id, section_id}] = ap_id;
+        }
+      }
+    }
+
+    RefreshTracker();
+  } else {
     client_active_ = false;
   }
 }
+
+bool APState::HasCheckedGameLocation(int area_id, int section_id) const {
+  std::tuple<int, int> location_key = {area_id, section_id};
+
+  if (ap_id_by_location_id_.count(location_key)) {
+    return checked_locations_.count(ap_id_by_location_id_.at(location_key));
+  } else {
+    return false;
+  }
+}
+
+void APState::RefreshTracker() { tracker_frame_->UpdateIndicators(); }
 
 APState& GetAPState() {
   static APState* instance = new APState();

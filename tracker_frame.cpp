@@ -34,11 +34,16 @@ TrackerFrame::TrackerFrame()
   Bind(wxEVT_MENU, &TrackerFrame::OnExit, this, wxID_EXIT);
   Bind(wxEVT_MENU, &TrackerFrame::OnConnect, this, ID_CONNECT);
 
-  new TrackerPanel(this);
+  tracker_panel_ = new TrackerPanel(this);
 }
 
 void TrackerFrame::SetStatusMessage(std::string message) {
   SetStatusText(message);
+}
+
+void TrackerFrame::UpdateIndicators() {
+  tracker_panel_->UpdateIndicators();
+  Refresh();
 }
 
 void TrackerFrame::OnAbout(wxCommandEvent &event) {

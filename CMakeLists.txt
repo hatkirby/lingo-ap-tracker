@@ -32,6 +32,7 @@ add_executable(lingo_ap_tracker
   area_popup.cpp
   ap_state.cpp
   connection_dialog.cpp
+  eye_indicator.cpp
 )
 set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD 17)
 set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD_REQUIRED ON)

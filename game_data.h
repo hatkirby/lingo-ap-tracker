@@ -52,7 +52,7 @@ struct Room {
 
 struct Location {
   std::string name;
-  int location_id = -1;
+  std::string ap_location_name;
   int room;
   std::vector<int> panels;
 };

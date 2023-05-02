@@ -252,7 +252,10 @@ GameData::GameData() {
       MapArea &map_area = map_areas_[area_id];
       // room field should be the original room ID
       map_area.locations.push_back(
-          {.name = panel.name, .room = panel.room, .panels = {panel.id}});
+          {.name = panel.name,
+           .ap_location_name = room_name + " - " + panel.name,
+           .room = panel.room,
+           .panels = {panel.id}});
     }
   }
 
@@ -278,8 +281,10 @@ GameData::GameData() {
       int area_id = AddOrGetArea(area_name);
       MapArea &map_area = map_areas_[area_id];
       // room field should be the original room ID
-      map_area.locations.push_back(
-          {.name = section_name, .room = door.room, .panels = door.panels});
+      map_area.locations.push_back({.name = section_name,
+                                    .ap_location_name = door.location_name,
+                                    .room = door.room,
+                                    .panels = door.panels});
     }
   }
 }

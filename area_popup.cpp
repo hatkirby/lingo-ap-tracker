@@ -1,37 +1,51 @@
 #include "area_popup.h"
 
+#include "ap_state.h"
 #include "game_data.h"
 
 AreaPopup::AreaPopup(wxWindow* parent, int area_id)
     : wxPanel(parent, wxID_ANY), area_id_(area_id) {
   const MapArea& map_area = GetGameData().GetMapArea(area_id);
 
-  wxBoxSizer* list_sizer = new wxBoxSizer(wxVERTICAL);
+  wxFlexGridSizer* section_sizer = new wxFlexGridSizer(2, 10, 10);
 
-  wxStaticText* top_label = new wxStaticText(this, -1, map_area.name);
-  top_label->SetForegroundColour(*wxBLACK);
-  top_label->SetFont(top_label->GetFont().Bold());
-  list_sizer->Add(top_label, wxSizerFlags().Center().DoubleBorder(wxDOWN));
-
-  bool is_first = true;
   for (const Location& location : map_area.locations) {
-    wxSizerFlags sizer_flags = wxSizerFlags().Left();
-    if (!is_first) {
-      sizer_flags = sizer_flags.Border(wxUP);
-    }
+    EyeIndicator* eye_indicator = new EyeIndicator(this);
+    section_sizer->Add(eye_indicator, wxSizerFlags().Expand());
+    eye_indicators_.push_back(eye_indicator);
 
     wxStaticText* section_label = new wxStaticText(this, -1, location.name);
-    section_label->SetForegroundColour(*wxBLACK);
-    list_sizer->Add(section_label, sizer_flags);
-
-    is_first = false;
+    section_label->SetForegroundColour(*wxWHITE);
+    section_sizer->Add(
+        section_label,
+        wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
+    section_labels_.push_back(section_label);
   }
 
   wxBoxSizer* top_sizer = new wxBoxSizer(wxVERTICAL);
-  top_sizer->Add(list_sizer, wxSizerFlags().DoubleBorder(wxALL));
+
+  wxStaticText* top_label = new wxStaticText(this, -1, map_area.name);
+  top_label->SetForegroundColour(*wxWHITE);
+  top_label->SetFont(top_label->GetFont().Bold());
+  top_sizer->Add(top_label,
+                 wxSizerFlags().Center().DoubleBorder(wxUP | wxLEFT | wxRIGHT));
+
+  top_sizer->Add(section_sizer, wxSizerFlags().DoubleBorder(wxALL).Expand());
 
   SetSizerAndFit(top_sizer);
 
-  SetBackgroundColour(*wxLIGHT_GREY);
+  SetBackgroundColour(*wxBLACK);
   Hide();
+}
+
+void AreaPopup::UpdateIndicators() {
+  const MapArea& map_area = GetGameData().GetMapArea(area_id_);
+  for (int section_id = 0; section_id < map_area.locations.size();
+       section_id++) {
+    bool checked = GetAPState().HasCheckedGameLocation(area_id_, section_id);
+    const wxColour* text_color = checked ? wxWHITE : wxGREEN;
+
+    section_labels_[section_id]->SetForegroundColour(*text_color);
+    eye_indicators_[section_id]->SetChecked(checked);
+  }
 }

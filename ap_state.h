@@ -6,6 +6,7 @@
 #include <mutex>
 #include <set>
 #include <string>
+#include <tuple>
 
 #include "game_data.h"
 #include "tracker_frame.h"
@@ -20,20 +21,24 @@ class APState {
 
   void Connect(std::string server, std::string player, std::string password);
 
+  bool HasCheckedGameLocation(int area_id, int section_id) const;
+
  private:
+  void RefreshTracker();
+
   TrackerFrame* tracker_frame_;
 
   std::unique_ptr<APClient> apclient_;
   bool client_active_ = false;
   std::mutex client_mutex_;
 
-  std::set<int> inventory_;
-  std::set<int> checked_locations_;
+  std::set<int64_t> inventory_;
+  std::set<int64_t> checked_locations_;
 
-  std::map<int, int> ap_id_by_location_id_;
-  std::map<int, int> ap_id_by_door_id_;
-  std::map<int, int> ap_id_by_door_group_id_;
-  std::map<LingoColor, int> ap_id_by_color_;
+  std::map<std::tuple<int, int>, int64_t> ap_id_by_location_id_;
+  std::map<int, int64_t> ap_id_by_door_id_;
+  std::map<int, int64_t> ap_id_by_door_group_id_;
+  std::map<LingoColor, int64_t> ap_id_by_color_;
 };
 
 APState& GetAPState();
