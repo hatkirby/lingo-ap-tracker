@@ -1,3 +1,18 @@
 [submodule "vendor/hkutil"]
 	path = vendor/hkutil
 	url = https://github.com/hatkirby/hkutil.git
+[submodule "vendor/apclientpp"]
+	path = vendor/apclientpp
+	url = https://github.com/black-sliver/apclientpp.git
+[submodule "vendor/valijson"]
+	path = vendor/valijson
+	url = https://github.com/tristanpenman/valijson.git
+[submodule "vendor/wswrap"]
+	path = vendor/wswrap
+	url = https://github.com/black-sliver/wswrap.git
+[submodule "vendor/websocketpp"]
+	path = vendor/websocketpp
+	url = https://github.com/zaphoyd/websocketpp.git
+[submodule "vendor/asio"]
+	path = vendor/asio
+	url = https://github.com/chriskohlhoff/asio/
