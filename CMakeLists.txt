@@ -19,6 +19,7 @@ add_executable(lingo_ap_tracker
   tracker_frame.cpp
   tracker_panel.cpp
   game_data.cpp
+  area_window.cpp
 )
 set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD 17)
 set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD_REQUIRED ON)

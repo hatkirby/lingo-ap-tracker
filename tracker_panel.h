@@ -7,6 +7,8 @@
 #include <wx/wx.h>
 #endif
 
+#include "area_window.h"
+
 class TrackerPanel : public wxPanel {
  public:
   TrackerPanel(wxWindow *parent);
@@ -18,6 +20,8 @@ class TrackerPanel : public wxPanel {
 
   wxImage map_image_;
   wxBitmap rendered_;
+
+  std::vector<AreaWindow *> area_windows_;
 };
 
 #endif /* end of include guard: TRACKER_PANEL_H_D675A54D */

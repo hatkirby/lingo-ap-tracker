@@ -217,6 +217,21 @@ GameData::GameData() {
       }
     }
   }
+
+  map_areas_.reserve(areas_config.size());
+
+  std::map<std::string, int> fold_areas;
+  for (const auto &area_it : areas_config) {
+    if (area_it.second["map"]) {
+      int area_id = AddOrGetArea(area_it.first.as<std::string>());
+      MapArea &area_obj = map_areas_[area_id];
+      area_obj.map_x = area_it.second["map"][0].as<int>();
+      area_obj.map_y = area_it.second["map"][1].as<int>();
+    } else if (area_it.second["fold_into"]) {
+      fold_areas[area_it.first.as<std::string>()] =
+          AddOrGetArea(area_it.second["fold_into"].as<std::string>());
+    }
+  }
 }
 
 int GameData::AddOrGetRoom(std::string room) {
@@ -248,6 +263,16 @@ int GameData::AddOrGetPanel(std::string room, std::string panel) {
   }
 
   return panel_by_id_[full_name];
+}
+
+int GameData::AddOrGetArea(std::string area) {
+  if (!area_by_id_.count(area)) {
+    area_by_id_[area] = map_areas_.size();
+    map_areas_.push_back(
+        {.id = static_cast<int>(map_areas_.size()), .name = area});
+  }
+
+  return area_by_id_[area];
 }
 
 const GameData &GetGameData() {

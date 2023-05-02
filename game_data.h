@@ -57,6 +57,7 @@ struct Location {
 };
 
 struct MapArea {
+  int id;
   std::string name;
   std::vector<Location> locations;
   int map_x;
@@ -67,20 +68,27 @@ class GameData {
  public:
   GameData();
 
+  const std::vector<MapArea>& GetMapAreas() const { return map_areas_; }
+
+  const MapArea& GetMapArea(int id) const { return map_areas_.at(id); }
+
  private:
   int AddOrGetRoom(std::string room);
   int AddOrGetDoor(std::string room, std::string door);
   int AddOrGetPanel(std::string room, std::string panel);
+  int AddOrGetArea(std::string area);
 
   std::vector<Room> rooms_;
   std::vector<Door> doors_;
   std::vector<Panel> panels_;
+  std::vector<MapArea> map_areas_;
 
   std::map<std::string, int> room_by_id_;
   std::map<std::string, int> door_by_id_;
   std::map<std::string, int> panel_by_id_;
+  std::map<std::string, int> area_by_id_;
 };
 
-const GameData &GetGameData();
+const GameData& GetGameData();
 
 #endif /* end of include guard: GAME_DATA_H_9C42AC51 */

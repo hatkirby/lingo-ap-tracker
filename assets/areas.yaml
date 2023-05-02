@@ -1,0 +1,129 @@
+---
+  Starting Room:
+    map: [1589, 1192]
+  Hidden Room:
+    map: [1725, 1236]
+  The Seeker:
+    map: [1686, 1361]
+  Second Room:
+    map: [1589, 1029]
+  Hub Room:
+    map: [1589, 924]
+  Pilgrim Room:
+    map: [1493, 1564]
+  Crossroads:
+    map: [1294, 720]
+  Amen Name Area:
+    fold_into: Crossroads
+  The Tenacious:
+    map: [1589, 780]
+  Warts Straw Area:
+    fold_into: Outside The Agreeable
+  Leaf Feel Area:
+    fold_into: Outside The Agreeable
+  Outside The Agreeable:
+    map: [1766, 700]
+  Hallway Room:
+    map: [573, 1631]
+  Dread Hallway:
+    fold_into: Outside The Agreeable
+  The Agreeable:
+    map: [1909, 699]
+  Hedge Maze:
+    map: [2102, 600]
+  The Perceptive:
+    map: [2251, 600]
+  The Fearless:
+    map: [1790, 2220]
+  The Observant:
+    map: [2252, 193]
+  The Incomparable:
+    map: [2642, 872]
+  Orange Tower First Floor:
+    map: [1285, 928]
+  Color Hunt:
+    map: [1790, 2079]
+  Orange Tower Third Floor:
+    map: [1935, 1575]
+  Orange Tower Fourth Floor:
+    map: [1365, 394]
+  Orange Tower Fifth Floor:
+    map: [1252, 1259]
+  Orange Tower Seventh Floor:
+    map: [1587, 1900]
+  Courtyard:
+    map: [863, 387]
+  The Colorful:
+    map: [863, 200]
+  Welcome Back Area:
+    map: [1472, 1233]
+  Owl Hallway:
+    map: [2080, 886]
+  Outside The Initiated:
+    map: [2282, 1483]
+  The Initiated:
+    map: [2294, 1174]
+  The Traveled:
+    map: [1964, 994]
+  Outside The Bold:
+    map: [2325, 1927]
+  The Bold:
+    map: [2297, 2053]
+  The Red:
+    map: [2352, 2053]
+  Outside The Undeterred:
+    map: [657, 1315]
+  The Undeterred:
+    map: [618, 1456]
+  Number Hunt:
+    map: [1108, 1315]
+  Directional Gallery:
+    map: [943, 1169]
+  Champion's Rest:
+    map: [1845, 1883]
+  The Bearer:
+    map: [2155, 1764]
+  The Steady:
+    map: [2121, 2182]
+  Knight Night Room:
+    map: [1990, 1322]
+  The Artistic:
+    map: [1151, 1793]
+  The Artistic (Smiley):
+    fold_into: The Artistic
+  The Discerning:
+    map: [1098, 807]
+  The Ecstatic:
+    map: [972, 805]
+  The Eyes They See:
+    map: [955, 933]
+  Outside The Wondrous:
+    map: [691, 524]
+  The Wondrous:
+    map: [648, 338]
+  Elements Area:
+    map: [908, 1632]
+  Wanderlust Tutorial:
+    map: [1587, 1765]
+  Rhyme Room (Smiley):
+    fold_into: Rhyme Room
+  Rhyme Room (Cross):
+    fold_into: Rhyme Room
+  Rhyme Room:
+    map: [1587, 1492]
+  Rhyme Room (Target):
+    fold_into: Rhyme Room
+  Room Room:
+    map: [2553, 2153]
+  Outside The Wise:
+    map: [1087, 1986]
+  The Wise:
+    map: [759, 1986]
+  Outside The Scientific:
+    map: [510, 2271]
+  The Scientific:
+    map: [1368, 2103]
+  Art Gallery:
+    map: [2474, 1366]
+  Challenge Room:
+    map: [1486, 1357]

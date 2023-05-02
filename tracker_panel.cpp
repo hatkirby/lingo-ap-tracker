@@ -1,9 +1,15 @@
 #include "tracker_panel.h"
 
+#include "game_data.h"
+
 TrackerPanel::TrackerPanel(wxWindow *parent) : wxPanel(parent, wxID_ANY) {
   map_image_ = wxImage("assets/lingo_map.png", wxBITMAP_TYPE_PNG);
   if (!map_image_.IsOk()) {
     return;
+  }
+
+  for (const MapArea &map_area : GetGameData().GetMapAreas()) {
+    area_windows_.push_back(new AreaWindow(this, map_area.id));
   }
 
   Redraw();
@@ -43,4 +49,18 @@ void TrackerPanel::Redraw() {
   rendered_ = wxBitmap(
       map_image_.Scale(final_width, final_height, wxIMAGE_QUALITY_NORMAL)
           .Size(panel_size, {final_x, final_y}, 0, 0, 0));
+
+  for (AreaWindow *area_window : area_windows_) {
+    const MapArea &map_area =
+        GetGameData().GetMapArea(area_window->GetAreaId());
+    int real_area_size =
+        final_width * AreaWindow::EFFECTIVE_SIZE / image_size.GetWidth();
+    area_window->SetSize({real_area_size, real_area_size});
+    area_window->SetPosition({
+        final_x + (map_area.map_x - (AreaWindow::EFFECTIVE_SIZE / 2)) *
+                      final_width / image_size.GetWidth(),
+        final_y + (map_area.map_y - (AreaWindow::EFFECTIVE_SIZE / 2)) *
+                      final_width / image_size.GetWidth(),
+    });
+  }
 }
