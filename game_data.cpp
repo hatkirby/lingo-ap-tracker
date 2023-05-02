@@ -1,8 +1,9 @@
 #include "game_data.h"
 
 #include <hkutil/string.h>
-#include <iostream>
 #include <yaml-cpp/yaml.h>
+
+#include <iostream>
 
 LingoColor GetColorForString(const std::string &str) {
   if (str == "black") {
@@ -33,7 +34,7 @@ GameData::GameData() {
   YAML::Node lingo_config = YAML::LoadFile("assets/LL1.yaml");
   YAML::Node areas_config = YAML::LoadFile("assets/areas.yaml");
 
-  rooms_.reserve(lingo_config.size() + 1); // The +1 is for Menu
+  rooms_.reserve(lingo_config.size() + 1);  // The +1 is for Menu
 
   for (const auto &room_it : lingo_config) {
     int room_id = AddOrGetRoom(room_it.first.as<std::string>());
@@ -44,49 +45,49 @@ GameData::GameData() {
       Room &from_room_obj = rooms_[from_room_id];
 
       switch (entrance_it.second.Type()) {
-      case YAML::NodeType::Scalar: {
-        // This is just "true".
-        from_room_obj.exits.push_back({.destination_room = room_id});
-        break;
-      }
-      case YAML::NodeType::Map: {
-        Exit exit_obj;
-        exit_obj.destination_room = room_id;
-
-        if (entrance_it.second["door"]) {
-          std::string door_room = room_obj.name;
-          if (entrance_it.second["room"]) {
-            door_room = entrance_it.second["room"].as<std::string>();
-          }
-          exit_obj.door = AddOrGetDoor(
-              door_room, entrance_it.second["door"].as<std::string>());
+        case YAML::NodeType::Scalar: {
+          // This is just "true".
+          from_room_obj.exits.push_back({.destination_room = room_id});
+          break;
         }
-
-        from_room_obj.exits.push_back(exit_obj);
-        break;
-      }
-      case YAML::NodeType::Sequence: {
-        for (const auto &option : entrance_it.second) {
+        case YAML::NodeType::Map: {
           Exit exit_obj;
           exit_obj.destination_room = room_id;
 
-          std::string door_room = room_obj.name;
-          if (option["room"]) {
-            door_room = option["room"].as<std::string>();
+          if (entrance_it.second["door"]) {
+            std::string door_room = room_obj.name;
+            if (entrance_it.second["room"]) {
+              door_room = entrance_it.second["room"].as<std::string>();
+            }
+            exit_obj.door = AddOrGetDoor(
+                door_room, entrance_it.second["door"].as<std::string>());
           }
-          exit_obj.door =
-              AddOrGetDoor(door_room, option["door"].as<std::string>());
 
           from_room_obj.exits.push_back(exit_obj);
+          break;
         }
+        case YAML::NodeType::Sequence: {
+          for (const auto &option : entrance_it.second) {
+            Exit exit_obj;
+            exit_obj.destination_room = room_id;
 
-        break;
-      }
-      default: {
-        // This shouldn't happen.
-        std::cout << "Error reading game data: " << entrance_it << std::endl;
-        break;
-      }
+            std::string door_room = room_obj.name;
+            if (option["room"]) {
+              door_room = option["room"].as<std::string>();
+            }
+            exit_obj.door =
+                AddOrGetDoor(door_room, option["door"].as<std::string>());
+
+            from_room_obj.exits.push_back(exit_obj);
+          }
+
+          break;
+        }
+        default: {
+          // This shouldn't happen.
+          std::cout << "Error reading game data: " << entrance_it << std::endl;
+          break;
+        }
       }
     }
 

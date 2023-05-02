@@ -7,7 +7,7 @@
 #include "tracker_frame.h"
 
 class TrackerApp : public wxApp {
-public:
+ public:
   virtual bool OnInit() {
     TrackerFrame *frame = new TrackerFrame();
     frame->Show(true);

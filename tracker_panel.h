@@ -8,10 +8,10 @@
 #endif
 
 class TrackerPanel : public wxPanel {
-public:
+ public:
   TrackerPanel(wxWindow *parent);
 
-private:
+ private:
   void OnPaint(wxPaintEvent &event);
 
   void Redraw();

@@ -8,10 +8,10 @@
 #endif
 
 class TrackerFrame : public wxFrame {
-public:
+ public:
   TrackerFrame();
 
-private:
+ private:
   void OnExit(wxCommandEvent &event);
   void OnAbout(wxCommandEvent &event);
 };

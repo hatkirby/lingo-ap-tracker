@@ -64,10 +64,10 @@ struct MapArea {
 };
 
 class GameData {
-public:
+ public:
   GameData();
 
-private:
+ private:
   int AddOrGetRoom(std::string room);
   int AddOrGetDoor(std::string room, std::string door);
   int AddOrGetPanel(std::string room, std::string panel);
