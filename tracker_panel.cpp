@@ -1,5 +1,6 @@
 #include "tracker_panel.h"
 
+#include "area_popup.h"
 #include "game_data.h"
 
 TrackerPanel::TrackerPanel(wxWindow *parent) : wxPanel(parent, wxID_ANY) {
@@ -9,7 +10,13 @@ TrackerPanel::TrackerPanel(wxWindow *parent) : wxPanel(parent, wxID_ANY) {
   }
 
   for (const MapArea &map_area : GetGameData().GetMapAreas()) {
-    area_windows_.push_back(new AreaWindow(this, map_area.id));
+    AreaPopup *area_popup = new AreaPopup(this, map_area.id);
+    area_popup->SetPosition({0, 0});
+    area_popup->Raise();
+
+    AreaWindow *area_window = new AreaWindow(this, map_area.id, area_popup);
+    area_window->Lower();
+    area_windows_.push_back(area_window);
   }
 
   Redraw();
@@ -62,5 +69,18 @@ void TrackerPanel::Redraw() {
         final_y + (map_area.map_y - (AreaWindow::EFFECTIVE_SIZE / 2)) *
                       final_width / image_size.GetWidth(),
     });
+
+    AreaPopup *area_popup = area_window->GetPopup();
+    int popup_x =
+        final_x + map_area.map_x * final_width / image_size.GetWidth();
+    int popup_y =
+        final_y + map_area.map_y * final_width / image_size.GetWidth();
+    if (popup_x + area_popup->GetSize().GetWidth() > panel_size.GetWidth()) {
+      popup_x = panel_size.GetWidth() - area_popup->GetSize().GetWidth();
+    }
+    if (popup_y + area_popup->GetSize().GetHeight() > panel_size.GetHeight()) {
+      popup_y = panel_size.GetHeight() - area_popup->GetSize().GetHeight();
+    }
+    area_popup->SetPosition({popup_x, popup_y});
   }
 }

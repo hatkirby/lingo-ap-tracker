@@ -6,6 +6,8 @@ TrackerFrame::TrackerFrame()
     : wxFrame(nullptr, wxID_ANY, "Lingo Archipelago Tracker") {
   ::wxInitAllImageHandlers();
 
+  SetSize(1280, 728);
+
   wxMenu *menuFile = new wxMenu();
   menuFile->Append(wxID_EXIT);
 
