@@ -2,3 +2,4 @@ build/
 builds/
 assets/LL1.yaml
 .DS_Store
+.vs

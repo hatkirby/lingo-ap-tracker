@@ -308,7 +308,10 @@ int GameData::AddOrGetDoor(std::string room, std::string door) {
 
   if (!door_by_id_.count(full_name)) {
     door_by_id_[full_name] = doors_.size();
-    doors_.push_back({.name = door, .room = AddOrGetRoom(room)});
+    doors_.push_back({
+        .room = AddOrGetRoom(room),
+        .name = door
+    });
   }
 
   return door_by_id_[full_name];
@@ -321,7 +324,7 @@ int GameData::AddOrGetPanel(std::string room, std::string panel) {
     int panel_id = panels_.size();
     panel_by_id_[full_name] = panel_id;
     panels_.push_back(
-        {.id = panel_id, .name = panel, .room = AddOrGetRoom(room)});
+        {.id = panel_id, .room = AddOrGetRoom(room), .name = panel});
   }
 
   return panel_by_id_[full_name];

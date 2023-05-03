@@ -3,6 +3,11 @@ project (lingo_ap_tracker)
 
 set(CMAKE_BUILD_TYPE Debug)
 
+if (MSVC)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+set(CMAKE_WIN32_EXECUTABLE true)
+endif(MSVC)
+
 find_package(wxWidgets CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(yaml-cpp REQUIRED)
@@ -36,6 +41,6 @@ add_executable(lingo_ap_tracker
   eye_indicator.cpp
   tracker_state.cpp
 )
-set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD 17)
+set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD 20)
 set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD_REQUIRED ON)
 target_link_libraries(lingo_ap_tracker PRIVATE OpenSSL::SSL OpenSSL::Crypto wx::core wx::base yaml-cpp)

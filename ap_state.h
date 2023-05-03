@@ -1,7 +1,6 @@
 #ifndef AP_STATE_H_664A4180
 #define AP_STATE_H_664A4180
 
-#include <apclient.hpp>
 #include <memory>
 #include <mutex>
 #include <set>
@@ -40,7 +39,6 @@ class APState {
 
   TrackerFrame* tracker_frame_;
 
-  std::unique_ptr<APClient> apclient_;
   bool client_active_ = false;
   std::mutex client_mutex_;
 

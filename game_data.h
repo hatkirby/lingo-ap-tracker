@@ -2,6 +2,7 @@
 #define GAME_DATA_H_9C42AC51
 
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
