@@ -16,3 +16,6 @@
 [submodule "vendor/asio"]
 	path = vendor/asio
 	url = https://github.com/chriskohlhoff/asio/
+[submodule "vendor/vcpkg"]
+	path = vendor/vcpkg
+	url = https://github.com/Microsoft/vcpkg.git

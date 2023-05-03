@@ -6,9 +6,8 @@ set(CMAKE_BUILD_TYPE Debug)
 find_package(wxWidgets COMPONENTS core base)
 include(${wxWidgets_USE_FILE})
 
-find_package(PkgConfig)
-pkg_check_modules(yaml-cpp yaml-cpp REQUIRED)
-pkg_check_modules(openssl openssl REQUIRED)
+find_package(OpenSSL)
+find_package(yaml-cpp)
 
 include_directories(
   vendor/hkutil
