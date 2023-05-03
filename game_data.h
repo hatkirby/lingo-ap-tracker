@@ -45,11 +45,18 @@ struct Door {
 struct Exit {
   int destination_room;
   std::optional<int> door;
+  bool painting = false;
+};
+
+struct PaintingExit {
+  std::string id;
+  std::optional<int> door;
 };
 
 struct Room {
   std::string name;
   std::vector<Exit> exits;
+  std::vector<PaintingExit> paintings;
 };
 
 struct Location {
@@ -87,6 +94,10 @@ class GameData {
 
   const Panel& GetPanel(int panel_id) const { return panels_.at(panel_id); }
 
+  int GetRoomForPainting(const std::string& painting_id) const {
+    return room_by_painting_.at(painting_id);
+  }
+
  private:
   int AddOrGetRoom(std::string room);
   int AddOrGetDoor(std::string room, std::string door);
@@ -102,6 +113,8 @@ class GameData {
   std::map<std::string, int> door_by_id_;
   std::map<std::string, int> panel_by_id_;
   std::map<std::string, int> area_by_id_;
+
+  std::map<std::string, int> room_by_painting_;
 };
 
 const GameData& GetGameData();

@@ -63,6 +63,10 @@ GameData::GameData() {
                 door_room, entrance_it.second["door"].as<std::string>());
           }
 
+          if (entrance_it.second["painting"]) {
+            exit_obj.painting = entrance_it.second["painting"].as<bool>();
+          }
+
           from_room_obj.exits.push_back(exit_obj);
           break;
         }
@@ -77,6 +81,10 @@ GameData::GameData() {
             }
             exit_obj.door =
                 AddOrGetDoor(door_room, option["door"].as<std::string>());
+
+            if (option["painting"]) {
+              exit_obj.painting = option["painting"].as<bool>();
+            }
 
             from_room_obj.exits.push_back(exit_obj);
           }
@@ -222,6 +230,31 @@ GameData::GameData() {
         if (door_it.second["include_reduce"]) {
           door_obj.exclude_reduce =
               !door_it.second["include_reduce"].as<bool>();
+        }
+      }
+    }
+
+    if (room_it.second["paintings"]) {
+      for (const auto& painting : room_it.second["paintings"]) {
+        std::string painting_id = painting["id"].as<std::string>();
+        room_by_painting_[painting_id] = room_id;
+
+        if (!painting["exit_only"] || !painting["exit_only"].as<bool>()) {
+          PaintingExit painting_exit;
+          painting_exit.id = painting_id;
+
+          if (painting["required_door"]) {
+            std::string rd_room = room_obj.name;
+            if (painting["required_door"]["room"]) {
+              rd_room = painting["required_door"]["room"].as<std::string>();
+            }
+
+            painting_exit.door = AddOrGetDoor(
+                rd_room,
+                painting["required_door"]["door"].as<std::string>());
+          }
+
+          room_obj.paintings.push_back(painting_exit);
         }
       }
     }

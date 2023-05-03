@@ -56,6 +56,10 @@ void APState::Connect(std::string server, std::string player,
 
   inventory_.clear();
   checked_locations_.clear();
+  door_shuffle_mode_ = kNO_DOORS;
+  color_shuffle_ = false;
+  painting_shuffle_ = false;
+  painting_mapping_.clear();
 
   bool connected = false;
   bool has_connection_result = false;
@@ -103,6 +107,15 @@ void APState::Connect(std::string server, std::string player,
 
     door_shuffle_mode_ = slot_data["shuffle_doors"].get<DoorShuffleMode>();
     color_shuffle_ = slot_data["shuffle_colors"].get<bool>();
+    painting_shuffle_ = slot_data["shuffle_paintings"].get<bool>();
+
+    if (painting_shuffle_ && slot_data.contains("painting_entrance_to_exit")) {
+      painting_mapping_.clear();
+
+      for (const auto& mapping_it : slot_data["painting_entrance_to_exit"].items()) {
+        painting_mapping_[mapping_it.key()] = mapping_it.value();
+      }
+    }
 
     connected = true;
     has_connection_result = true;

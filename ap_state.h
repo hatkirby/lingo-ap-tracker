@@ -32,6 +32,12 @@ class APState {
 
   bool IsColorShuffle() const { return color_shuffle_; }
 
+  bool IsPaintingShuffle() const { return painting_shuffle_; }
+
+  const std::map<std::string, std::string> GetPaintingMapping() const {
+    return painting_mapping_;
+  }
+
  private:
   void RefreshTracker();
 
@@ -51,6 +57,9 @@ class APState {
 
   DoorShuffleMode door_shuffle_mode_ = kNO_DOORS;
   bool color_shuffle_ = false;
+  bool painting_shuffle_ = false;
+
+  std::map<std::string, std::string> painting_mapping_;
 };
 
 APState& GetAPState();

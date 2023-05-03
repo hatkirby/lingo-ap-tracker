@@ -99,7 +99,22 @@ void TrackerState::CalculateState() {
         const Room& room_obj =
             GetGameData().GetRoom(room_exit.destination_room);
         for (const Exit& out_edge : room_obj.exits) {
-          new_boundary.push_back(out_edge);
+          if (!out_edge.painting || !GetAPState().IsPaintingShuffle()) {
+            new_boundary.push_back(out_edge);
+          }
+        }
+
+        if (GetAPState().IsPaintingShuffle()) {
+          for (const PaintingExit& out_edge : room_obj.paintings) {
+            if (GetAPState().GetPaintingMapping().count(out_edge.id)) {
+              Exit painting_exit;
+              painting_exit.destination_room = GetGameData().GetRoomForPainting(
+                  GetAPState().GetPaintingMapping().at(out_edge.id));
+              painting_exit.door = out_edge.door;
+
+              new_boundary.push_back(painting_exit);
+            }
+          }
         }
       }
     }
