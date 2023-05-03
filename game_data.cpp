@@ -183,8 +183,13 @@ GameData::GameData() {
           door_obj.skip_location = door_it.second["skip_location"].as<bool>();
         }
 
+        if (door_it.second["skip_item"]) {
+          door_obj.skip_item = door_it.second["skip_item"].as<bool>();
+        }
+
         if (door_it.second["event"]) {
           door_obj.skip_location = door_it.second["event"].as<bool>();
+          door_obj.skip_item = door_it.second["event"].as<bool>();
         }
 
         if (door_it.second["item_name"]) {

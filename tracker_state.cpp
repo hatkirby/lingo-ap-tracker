@@ -42,26 +42,23 @@ bool IsPanelReachable_Helper(int panel_id,
 bool IsDoorReachable_Helper(int door_id, const std::set<int>& reachable_rooms) {
   const Door& door_obj = GetGameData().GetDoor(door_id);
 
-  switch (GetAPState().GetDoorShuffleMode()) {
-    case DoorShuffleMode::kNone: {
-      if (!reachable_rooms.count(door_obj.room)) {
+  if (GetAPState().GetDoorShuffleMode() == kNO_DOORS || door_obj.skip_item) {
+    if (!reachable_rooms.count(door_obj.room)) {
+      return false;
+    }
+
+    for (int panel_id : door_obj.panels) {
+      if (!IsPanelReachable_Helper(panel_id, reachable_rooms)) {
         return false;
       }
+    }
 
-      for (int panel_id : door_obj.panels) {
-        if (!IsPanelReachable_Helper(panel_id, reachable_rooms)) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-    case DoorShuffleMode::kSimple: {
-      break;
-    }
-    case DoorShuffleMode::kComplex: {
-      break;
-    }
+    return true;
+  } else if (GetAPState().GetDoorShuffleMode() == kSIMPLE_DOORS &&
+             !door_obj.group_name.empty()) {
+    return GetAPState().HasItem(door_obj.group_name);
+  } else {
+    return GetAPState().HasItem(door_obj.item_name);
   }
 }
 
@@ -88,8 +85,7 @@ void TrackerState::CalculateState() {
       if (room_exit.door.has_value()) {
         if (IsDoorReachable_Helper(*room_exit.door, reachable_rooms)) {
           valid_transition = true;
-        } else if (GetAPState().GetDoorShuffleMode() ==
-                   DoorShuffleMode::kNone) {
+        } else if (GetAPState().GetDoorShuffleMode() == kNO_DOORS) {
           new_boundary.push_back(room_exit);
         }
       } else {

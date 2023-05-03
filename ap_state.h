@@ -11,7 +11,7 @@
 #include "game_data.h"
 #include "tracker_frame.h"
 
-enum class DoorShuffleMode { kNone, kSimple, kComplex };
+enum DoorShuffleMode { kNO_DOORS = 0, kSIMPLE_DOORS = 1, kCOMPLEX_DOORS = 2 };
 
 class APState {
  public:
@@ -26,6 +26,8 @@ class APState {
   bool HasCheckedGameLocation(int area_id, int section_id) const;
 
   bool HasColorItem(LingoColor color) const;
+
+  bool HasItem(const std::string& item) const;
 
   DoorShuffleMode GetDoorShuffleMode() const { return door_shuffle_mode_; }
 
@@ -46,11 +48,10 @@ class APState {
   std::set<int64_t> checked_locations_;
 
   std::map<std::tuple<int, int>, int64_t> ap_id_by_location_id_;
-  std::map<int, int64_t> ap_id_by_door_id_;
-  std::map<int, int64_t> ap_id_by_door_group_id_;
+  std::map<std::string, int64_t> ap_id_by_item_name_;
   std::map<LingoColor, int64_t> ap_id_by_color_;
 
-  DoorShuffleMode door_shuffle_mode_ = DoorShuffleMode::kNone;
+  DoorShuffleMode door_shuffle_mode_ = kNO_DOORS;
   bool color_shuffle_ = false;
 };
 

@@ -36,6 +36,7 @@ struct Door {
   std::string item_name;
   std::string group_name;
   bool skip_location = false;
+  bool skip_item = false;
   std::vector<int> panels;
   bool exclude_reduce = true;
 };
@@ -78,6 +79,8 @@ class GameData {
   }
 
   const Room& GetRoom(int room_id) const { return rooms_.at(room_id); }
+
+  const std::vector<Door>& GetDoors() const { return doors_; }
 
   const Door& GetDoor(int door_id) const { return doors_.at(door_id); }
 

@@ -17,11 +17,6 @@ constexpr int AP_REVISION = 0;
 
 constexpr int ITEM_HANDLING = 7;  // <- all
 
-NLOHMANN_JSON_SERIALIZE_ENUM(DoorShuffleMode,
-                             {{DoorShuffleMode::kNone, "none"},
-                              {DoorShuffleMode::kSimple, "simple"},
-                              {DoorShuffleMode::kComplex, "complex"}});
-
 APState::APState() {
   std::thread([this]() {
     for (;;) {
@@ -178,6 +173,17 @@ void APState::Connect(std::string server, std::string player,
       }
     }
 
+    for (const Door& door : GetGameData().GetDoors()) {
+      if (!door.skip_item) {
+        ap_id_by_item_name_[door.item_name] = GetItemId(door.item_name);
+
+        if (!door.group_name.empty() &&
+            !ap_id_by_item_name_.count(door.group_name)) {
+          ap_id_by_item_name_[door.group_name] = GetItemId(door.group_name);
+        }
+      }
+    }
+
     ap_id_by_color_[LingoColor::kBlack] = GetItemId("Black");
     ap_id_by_color_[LingoColor::kRed] = GetItemId("Red");
     ap_id_by_color_[LingoColor::kBlue] = GetItemId("Blue");
@@ -207,6 +213,14 @@ bool APState::HasCheckedGameLocation(int area_id, int section_id) const {
 bool APState::HasColorItem(LingoColor color) const {
   if (ap_id_by_color_.count(color)) {
     return inventory_.count(ap_id_by_color_.at(color));
+  } else {
+    return false;
+  }
+}
+
+bool APState::HasItem(const std::string& item) const {
+  if (ap_id_by_item_name_.count(item)) {
+    return inventory_.count(ap_id_by_item_name_.at(item));
   } else {
     return false;
   }
