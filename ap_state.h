@@ -43,10 +43,15 @@ class APState {
 
   int64_t GetItemId(const std::string& item_name);
 
+  void DestroyClient();
+
   TrackerFrame* tracker_frame_;
 
   bool client_active_ = false;
   std::mutex client_mutex_;
+
+  bool connected_ = false;
+  bool has_connection_result_ = false;
 
   std::set<int64_t> inventory_;
   std::set<int64_t> checked_locations_;

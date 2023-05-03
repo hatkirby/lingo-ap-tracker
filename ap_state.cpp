@@ -46,9 +46,7 @@ void APState::Connect(std::string server, std::string player,
     std::lock_guard client_guard(client_mutex_);
 
     if (apclient) {
-      apclient->reset();
-      delete apclient;
-      apclient = nullptr;
+      DestroyClient();
     }
 
     apclient = new APClient(ap_get_uuid(""), "Lingo", server);
@@ -61,10 +59,10 @@ void APState::Connect(std::string server, std::string player,
   painting_shuffle_ = false;
   painting_mapping_.clear();
 
-  bool connected = false;
-  bool has_connection_result = false;
+  connected_ = false;
+  has_connection_result_ = false;
 
-  apclient->set_room_info_handler([&]() {
+  apclient->set_room_info_handler([this, player, password]() {
     tracker_frame_->SetStatusMessage(
         "Connected to Archipelago server. Authenticating...");
 
@@ -73,7 +71,7 @@ void APState::Connect(std::string server, std::string player,
   });
 
   apclient->set_location_checked_handler(
-      [&](const std::list<int64_t>& locations) {
+      [this](const std::list<int64_t>& locations) {
         for (const int64_t location_id : locations) {
           checked_locations_.insert(location_id);
           std::cout << "Location: " << location_id << std::endl;
@@ -82,16 +80,16 @@ void APState::Connect(std::string server, std::string player,
         RefreshTracker();
       });
 
-  apclient->set_slot_disconnected_handler([&]() {
-    tracker_frame_->SetStatusMessage("Disconnected from Archipelago.");
+  apclient->set_slot_disconnected_handler([this]() {
+    tracker_frame_->SetStatusMessage("Disconnected from Archipelago. Attempting to reconnect...");
   });
 
-  apclient->set_socket_disconnected_handler([&]() {
-    tracker_frame_->SetStatusMessage("Disconnected from Archipelago.");
+  apclient->set_socket_disconnected_handler([this]() {
+    tracker_frame_->SetStatusMessage("Disconnected from Archipelago. Attempting to reconnect...");
   });
 
   apclient->set_items_received_handler(
-      [&](const std::list<APClient::NetworkItem>& items) {
+      [this](const std::list<APClient::NetworkItem>& items) {
         for (const APClient::NetworkItem& item : items) {
           // TODO: Progressive items.
 
@@ -102,7 +100,7 @@ void APState::Connect(std::string server, std::string player,
         RefreshTracker();
       });
 
-  apclient->set_slot_connected_handler([&](const nlohmann::json& slot_data) {
+  apclient->set_slot_connected_handler([this](const nlohmann::json& slot_data) {
     tracker_frame_->SetStatusMessage("Connected to Archipelago!");
 
     door_shuffle_mode_ = slot_data["shuffle_doors"].get<DoorShuffleMode>();
@@ -117,14 +115,14 @@ void APState::Connect(std::string server, std::string player,
       }
     }
 
-    connected = true;
-    has_connection_result = true;
+    connected_ = true;
+    has_connection_result_ = true;
   });
 
   apclient->set_slot_refused_handler(
-      [&](const std::list<std::string>& errors) {
-        connected = false;
-        has_connection_result = true;
+      [this](const std::list<std::string>& errors) {
+        connected_ = false;
+        has_connection_result_ = true;
 
         tracker_frame_->SetStatusMessage("Disconnected from Archipelago.");
 
@@ -162,10 +160,12 @@ void APState::Connect(std::string server, std::string player,
   int timeout = 5000;  // 5 seconds
   int interval = 100;
   int remaining_loops = timeout / interval;
-  while (!has_connection_result) {
+  while (!has_connection_result_) {
     if (interval == 0) {
-      connected = false;
-      has_connection_result = true;
+      connected_ = false;
+      has_connection_result_ = true;
+
+      DestroyClient();
 
       tracker_frame_->SetStatusMessage("Disconnected from Archipelago.");
 
@@ -178,7 +178,7 @@ void APState::Connect(std::string server, std::string player,
     interval--;
   }
 
-  if (connected) {
+  if (connected_) {
     for (const MapArea& map_area : GetGameData().GetMapAreas()) {
       for (int section_id = 0; section_id < map_area.locations.size();
            section_id++) {
@@ -259,6 +259,13 @@ int64_t APState::GetItemId(const std::string& item_name) {
   }
 
   return ap_id;
+}
+
+void APState::DestroyClient() {
+  client_active_ = false;
+  apclient->reset();
+  delete apclient;
+  apclient = nullptr;
 }
 
 APState& GetAPState() {
