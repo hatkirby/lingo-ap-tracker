@@ -43,7 +43,7 @@ void AreaPopup::UpdateIndicators() {
   const MapArea& map_area = GetGameData().GetMapArea(area_id_);
   for (int section_id = 0; section_id < map_area.locations.size();
        section_id++) {
-    bool checked = GetAPState().HasCheckedGameLocation(area_id_, section_id);
+    bool checked = AP_HasCheckedGameLocation(area_id_, section_id);
     bool reachable =
         GetTrackerState().IsLocationReachable(area_id_, section_id);
     const wxColour* text_color = reachable ? wxWHITE : wxRED;

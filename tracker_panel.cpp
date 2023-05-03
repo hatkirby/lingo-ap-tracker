@@ -21,7 +21,7 @@ TrackerPanel::TrackerPanel(wxWindow *parent) : wxPanel(parent, wxID_ANY) {
 
     area.popup = new AreaPopup(this, map_area.id);
     area.popup->SetPosition({0, 0});
-    
+
     areas_.push_back(area);
   }
 
@@ -34,7 +34,7 @@ TrackerPanel::TrackerPanel(wxWindow *parent) : wxPanel(parent, wxID_ANY) {
 void TrackerPanel::UpdateIndicators() {
   Redraw();
 
-  for (AreaIndicator& area : areas_) {
+  for (AreaIndicator &area : areas_) {
     area.popup->UpdateIndicators();
   }
 }
@@ -90,7 +90,7 @@ void TrackerPanel::Redraw() {
   wxMemoryDC dc;
   dc.SelectObject(rendered_);
 
-  for (AreaIndicator& area : areas_) {
+  for (AreaIndicator &area : areas_) {
     const wxBrush *brush_color = wxGREY_BRUSH;
 
     const MapArea &map_area = GetGameData().GetMapArea(area.area_id);
@@ -98,10 +98,8 @@ void TrackerPanel::Redraw() {
     bool has_unreachable_unchecked = false;
     for (int section_id = 0; section_id < map_area.locations.size();
          section_id++) {
-      if (!GetAPState().HasCheckedGameLocation(area.area_id,
-                                               section_id)) {
-        if (GetTrackerState().IsLocationReachable(area.area_id,
-                                                  section_id)) {
+      if (!AP_HasCheckedGameLocation(area.area_id, section_id)) {
+        if (GetTrackerState().IsLocationReachable(area.area_id, section_id)) {
           has_reachable_unchecked = true;
         } else {
           has_unreachable_unchecked = true;
@@ -121,16 +119,15 @@ void TrackerPanel::Redraw() {
         final_width * AREA_EFFECTIVE_SIZE / image_size.GetWidth();
     int actual_border_size =
         real_area_size * AREA_BORDER_SIZE / AREA_EFFECTIVE_SIZE;
-    int real_area_x =
-        final_x + (map_area.map_x - (AREA_EFFECTIVE_SIZE / 2)) *
-                      final_width / image_size.GetWidth();
-    int real_area_y =
-        final_y + (map_area.map_y - (AREA_EFFECTIVE_SIZE / 2)) *
-                      final_width / image_size.GetWidth();
-    
+    int real_area_x = final_x + (map_area.map_x - (AREA_EFFECTIVE_SIZE / 2)) *
+                                    final_width / image_size.GetWidth();
+    int real_area_y = final_y + (map_area.map_y - (AREA_EFFECTIVE_SIZE / 2)) *
+                                    final_width / image_size.GetWidth();
+
     dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, actual_border_size));
     dc.SetBrush(*brush_color);
-    dc.DrawRectangle({real_area_x, real_area_y}, {real_area_size, real_area_size});
+    dc.DrawRectangle({real_area_x, real_area_y},
+                     {real_area_size, real_area_size});
 
     area.real_x1 = real_area_x;
     area.real_x2 = real_area_x + real_area_size;

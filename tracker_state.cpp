@@ -28,9 +28,9 @@ bool IsPanelReachable_Helper(int panel_id,
     }
   }
 
-  if (GetAPState().IsColorShuffle()) {
+  if (AP_IsColorShuffle()) {
     for (LingoColor color : panel_obj.colors) {
-      if (!GetAPState().HasColorItem(color)) {
+      if (!AP_HasColorItem(color)) {
         return false;
       }
     }
@@ -42,7 +42,7 @@ bool IsPanelReachable_Helper(int panel_id,
 bool IsDoorReachable_Helper(int door_id, const std::set<int>& reachable_rooms) {
   const Door& door_obj = GetGameData().GetDoor(door_id);
 
-  if (GetAPState().GetDoorShuffleMode() == kNO_DOORS || door_obj.skip_item) {
+  if (AP_GetDoorShuffleMode() == kNO_DOORS || door_obj.skip_item) {
     if (!reachable_rooms.count(door_obj.room)) {
       return false;
     }
@@ -54,15 +54,15 @@ bool IsDoorReachable_Helper(int door_id, const std::set<int>& reachable_rooms) {
     }
 
     return true;
-  } else if (GetAPState().GetDoorShuffleMode() == kSIMPLE_DOORS &&
+  } else if (AP_GetDoorShuffleMode() == kSIMPLE_DOORS &&
              !door_obj.group_name.empty()) {
-    return GetAPState().HasItem(door_obj.group_name);
+    return AP_HasItem(door_obj.group_name);
   } else {
-    bool has_item = GetAPState().HasItem(door_obj.item_name);
+    bool has_item = AP_HasItem(door_obj.item_name);
 
     if (!has_item) {
       for (const ProgressiveRequirement& prog_req : door_obj.progressives) {
-        if (GetAPState().HasItem(prog_req.item_name, prog_req.quantity)) {
+        if (AP_HasItem(prog_req.item_name, prog_req.quantity)) {
           has_item = true;
           break;
         }
@@ -96,7 +96,7 @@ void TrackerState::CalculateState() {
       if (room_exit.door.has_value()) {
         if (IsDoorReachable_Helper(*room_exit.door, reachable_rooms)) {
           valid_transition = true;
-        } else if (GetAPState().GetDoorShuffleMode() == kNO_DOORS) {
+        } else if (AP_GetDoorShuffleMode() == kNO_DOORS) {
           new_boundary.push_back(room_exit);
         }
       } else {
@@ -110,17 +110,17 @@ void TrackerState::CalculateState() {
         const Room& room_obj =
             GetGameData().GetRoom(room_exit.destination_room);
         for (const Exit& out_edge : room_obj.exits) {
-          if (!out_edge.painting || !GetAPState().IsPaintingShuffle()) {
+          if (!out_edge.painting || !AP_IsPaintingShuffle()) {
             new_boundary.push_back(out_edge);
           }
         }
 
-        if (GetAPState().IsPaintingShuffle()) {
+        if (AP_IsPaintingShuffle()) {
           for (const PaintingExit& out_edge : room_obj.paintings) {
-            if (GetAPState().GetPaintingMapping().count(out_edge.id)) {
+            if (AP_GetPaintingMapping().count(out_edge.id)) {
               Exit painting_exit;
               painting_exit.destination_room = GetGameData().GetRoomForPainting(
-                  GetAPState().GetPaintingMapping().at(out_edge.id));
+                  AP_GetPaintingMapping().at(out_edge.id));
               painting_exit.door = out_edge.door;
 
               new_boundary.push_back(painting_exit);
