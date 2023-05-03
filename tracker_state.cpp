@@ -58,7 +58,18 @@ bool IsDoorReachable_Helper(int door_id, const std::set<int>& reachable_rooms) {
              !door_obj.group_name.empty()) {
     return GetAPState().HasItem(door_obj.group_name);
   } else {
-    return GetAPState().HasItem(door_obj.item_name);
+    bool has_item = GetAPState().HasItem(door_obj.item_name);
+
+    if (!has_item) {
+      for (const ProgressiveRequirement& prog_req : door_obj.progressives) {
+        if (GetAPState().HasItem(prog_req.item_name, prog_req.quantity)) {
+          has_item = true;
+          break;
+        }
+      }
+    }
+
+    return has_item;
   }
 }
 

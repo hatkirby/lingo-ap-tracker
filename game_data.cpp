@@ -235,7 +235,7 @@ GameData::GameData() {
     }
 
     if (room_it.second["paintings"]) {
-      for (const auto& painting : room_it.second["paintings"]) {
+      for (const auto &painting : room_it.second["paintings"]) {
         std::string painting_id = painting["id"].as<std::string>();
         room_by_painting_[painting_id] = room_id;
 
@@ -250,11 +250,33 @@ GameData::GameData() {
             }
 
             painting_exit.door = AddOrGetDoor(
-                rd_room,
-                painting["required_door"]["door"].as<std::string>());
+                rd_room, painting["required_door"]["door"].as<std::string>());
           }
 
           room_obj.paintings.push_back(painting_exit);
+        }
+      }
+    }
+
+    if (room_it.second["progression"]) {
+      for (const auto &progression_it : room_it.second["progression"]) {
+        std::string progressive_item_name =
+            progression_it.first.as<std::string>();
+
+        int index = 1;
+        for (const auto &stage : progression_it.second) {
+          int door_id = -1;
+
+          if (stage.IsScalar()) {
+            door_id = AddOrGetDoor(room_obj.name, stage.as<std::string>());
+          } else {
+            door_id = AddOrGetDoor(stage["room"].as<std::string>(),
+                                   stage["door"].as<std::string>());
+          }
+
+          doors_[door_id].progressives.push_back(
+              {.item_name = progressive_item_name, .quantity = index});
+          index++;
         }
       }
     }
@@ -341,10 +363,7 @@ int GameData::AddOrGetDoor(std::string room, std::string door) {
 
   if (!door_by_id_.count(full_name)) {
     door_by_id_[full_name] = doors_.size();
-    doors_.push_back({
-        .room = AddOrGetRoom(room),
-        .name = door
-    });
+    doors_.push_back({.room = AddOrGetRoom(room), .name = door});
   }
 
   return door_by_id_[full_name];

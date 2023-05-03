@@ -4,9 +4,10 @@
 #define _WEBSOCKETPP_CPP11_STRICT_
 #pragma comment(lib, "crypt32")
 
+#include <hkutil/string.h>
+
 #include <apclient.hpp>
 #include <apuuid.hpp>
-#include <hkutil/string.h>
 #include <chrono>
 #include <exception>
 #include <list>
@@ -63,11 +64,13 @@ void APState::Connect(std::string server, std::string player,
   has_connection_result_ = false;
 
   apclient->set_room_info_handler([this, player, password]() {
+    inventory_.clear();
+
     tracker_frame_->SetStatusMessage(
         "Connected to Archipelago server. Authenticating...");
 
     apclient->ConnectSlot(player, password, ITEM_HANDLING, {"Tracker"},
-                           {AP_MAJOR, AP_MINOR, AP_REVISION});
+                          {AP_MAJOR, AP_MINOR, AP_REVISION});
   });
 
   apclient->set_location_checked_handler(
@@ -81,19 +84,19 @@ void APState::Connect(std::string server, std::string player,
       });
 
   apclient->set_slot_disconnected_handler([this]() {
-    tracker_frame_->SetStatusMessage("Disconnected from Archipelago. Attempting to reconnect...");
+    tracker_frame_->SetStatusMessage(
+        "Disconnected from Archipelago. Attempting to reconnect...");
   });
 
   apclient->set_socket_disconnected_handler([this]() {
-    tracker_frame_->SetStatusMessage("Disconnected from Archipelago. Attempting to reconnect...");
+    tracker_frame_->SetStatusMessage(
+        "Disconnected from Archipelago. Attempting to reconnect...");
   });
 
   apclient->set_items_received_handler(
       [this](const std::list<APClient::NetworkItem>& items) {
         for (const APClient::NetworkItem& item : items) {
-          // TODO: Progressive items.
-
-          inventory_.insert(item.item);
+          inventory_[item.item]++;
           std::cout << "Item: " << item.item << std::endl;
         }
 
@@ -110,7 +113,8 @@ void APState::Connect(std::string server, std::string player,
     if (painting_shuffle_ && slot_data.contains("painting_entrance_to_exit")) {
       painting_mapping_.clear();
 
-      for (const auto& mapping_it : slot_data["painting_entrance_to_exit"].items()) {
+      for (const auto& mapping_it :
+           slot_data["painting_entrance_to_exit"].items()) {
         painting_mapping_[mapping_it.key()] = mapping_it.value();
       }
     }
@@ -119,41 +123,40 @@ void APState::Connect(std::string server, std::string player,
     has_connection_result_ = true;
   });
 
-  apclient->set_slot_refused_handler(
-      [this](const std::list<std::string>& errors) {
-        connected_ = false;
-        has_connection_result_ = true;
+  apclient->set_slot_refused_handler([this](
+                                         const std::list<std::string>& errors) {
+    connected_ = false;
+    has_connection_result_ = true;
 
-        tracker_frame_->SetStatusMessage("Disconnected from Archipelago.");
+    tracker_frame_->SetStatusMessage("Disconnected from Archipelago.");
 
-        std::vector<std::string> error_messages;
-        error_messages.push_back("Could not connect to Archipelago.");
+    std::vector<std::string> error_messages;
+    error_messages.push_back("Could not connect to Archipelago.");
 
-        for (const std::string& error : errors) {
-          if (error == "InvalidSlot") {
-            error_messages.push_back("Invalid player name.");
-          } else if (error == "InvalidGame") {
-            error_messages.push_back(
-                "The specified player is not playing Lingo.");
-          } else if (error == "IncompatibleVersion") {
-            error_messages.push_back(
-                "The Archipelago server is not the correct version for this "
-                "client.");
-          } else if (error == "InvalidPassword") {
-            error_messages.push_back("Incorrect password.");
-          } else if (error == "InvalidItemsHandling") {
-            error_messages.push_back(
-                "Invalid item handling flag. This is a bug with the tracker. "
-                "Please report it to the lingo-ap-tracker GitHub.");
-          } else {
-            error_messages.push_back("Unknown error.");
-          }
-        }
+    for (const std::string& error : errors) {
+      if (error == "InvalidSlot") {
+        error_messages.push_back("Invalid player name.");
+      } else if (error == "InvalidGame") {
+        error_messages.push_back("The specified player is not playing Lingo.");
+      } else if (error == "IncompatibleVersion") {
+        error_messages.push_back(
+            "The Archipelago server is not the correct version for this "
+            "client.");
+      } else if (error == "InvalidPassword") {
+        error_messages.push_back("Incorrect password.");
+      } else if (error == "InvalidItemsHandling") {
+        error_messages.push_back(
+            "Invalid item handling flag. This is a bug with the tracker. "
+            "Please report it to the lingo-ap-tracker GitHub.");
+      } else {
+        error_messages.push_back("Unknown error.");
+      }
+    }
 
-        std::string full_message = hatkirby::implode(error_messages, " ");
+    std::string full_message = hatkirby::implode(error_messages, " ");
 
-        wxMessageBox(full_message, "Connection failed", wxOK | wxICON_ERROR);
-      });
+    wxMessageBox(full_message, "Connection failed", wxOK | wxICON_ERROR);
+  });
 
   client_active_ = true;
 
@@ -202,6 +205,10 @@ void APState::Connect(std::string server, std::string player,
             !ap_id_by_item_name_.count(door.group_name)) {
           ap_id_by_item_name_[door.group_name] = GetItemId(door.group_name);
         }
+
+        for (const ProgressiveRequirement& prog_req : door.progressives) {
+          ap_id_by_item_name_[prog_req.item_name] = GetItemId(prog_req.item_name);
+        }
       }
     }
 
@@ -239,9 +246,10 @@ bool APState::HasColorItem(LingoColor color) const {
   }
 }
 
-bool APState::HasItem(const std::string& item) const {
+bool APState::HasItem(const std::string& item, int quantity) const {
   if (ap_id_by_item_name_.count(item)) {
-    return inventory_.count(ap_id_by_item_name_.at(item));
+    int64_t ap_id = ap_id_by_item_name_.at(item);
+    return inventory_.count(ap_id) && inventory_.at(ap_id) >= quantity;
   } else {
     return false;
   }

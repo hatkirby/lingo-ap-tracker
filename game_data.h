@@ -30,6 +30,11 @@ struct Panel {
   bool exclude_reduce = false;
 };
 
+struct ProgressiveRequirement {
+  std::string item_name;
+  int quantity = 0;
+};
+
 struct Door {
   int room;
   std::string name;
@@ -40,6 +45,7 @@ struct Door {
   bool skip_item = false;
   std::vector<int> panels;
   bool exclude_reduce = true;
+  std::vector<ProgressiveRequirement> progressives;
 };
 
 struct Exit {

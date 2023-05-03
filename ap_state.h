@@ -26,7 +26,7 @@ class APState {
 
   bool HasColorItem(LingoColor color) const;
 
-  bool HasItem(const std::string& item) const;
+  bool HasItem(const std::string& item, int quantity = 1) const;
 
   DoorShuffleMode GetDoorShuffleMode() const { return door_shuffle_mode_; }
 
@@ -53,12 +53,13 @@ class APState {
   bool connected_ = false;
   bool has_connection_result_ = false;
 
-  std::set<int64_t> inventory_;
+  std::map<int64_t, int> inventory_;
   std::set<int64_t> checked_locations_;
 
   std::map<std::tuple<int, int>, int64_t> ap_id_by_location_id_;
   std::map<std::string, int64_t> ap_id_by_item_name_;
   std::map<LingoColor, int64_t> ap_id_by_color_;
+  std::map<int64_t, std::string> progressive_item_by_ap_id_;
 
   DoorShuffleMode door_shuffle_mode_ = kNO_DOORS;
   bool color_shuffle_ = false;
