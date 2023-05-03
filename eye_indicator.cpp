@@ -36,6 +36,8 @@ void EyeIndicator::OnPaint(wxPaintEvent& event) {
 
   wxPaintDC dc(this);
   dc.DrawBitmap(rendered_, 0, 0);
+
+  event.Skip();
 }
 
 void EyeIndicator::Redraw() {

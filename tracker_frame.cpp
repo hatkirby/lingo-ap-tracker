@@ -10,7 +10,7 @@ wxDEFINE_EVENT(STATE_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(STATUS_CHANGED, wxCommandEvent);
 
 TrackerFrame::TrackerFrame()
-    : wxFrame(nullptr, wxID_ANY, "Lingo Archipelago Tracker") {
+    : wxFrame(nullptr, wxID_ANY, "Lingo Archipelago Tracker", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxFULL_REPAINT_ON_RESIZE) {
   ::wxInitAllImageHandlers();
 
   GetAPState().SetTrackerFrame(this);

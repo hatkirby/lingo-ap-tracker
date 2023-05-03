@@ -34,7 +34,6 @@ add_executable(lingo_ap_tracker
   tracker_frame.cpp
   tracker_panel.cpp
   game_data.cpp
-  area_window.cpp
   area_popup.cpp
   ap_state.cpp
   connection_dialog.cpp
