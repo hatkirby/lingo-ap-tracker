@@ -31,4 +31,5 @@ ConnectionDialog::ConnectionDialog()
   SetSizerAndFit(top_sizer);
 
   Center();
+  server_box_->SetFocus();
 }
