@@ -2,6 +2,7 @@
 
 #include "ap_state.h"
 #include "connection_dialog.h"
+#include "tracker_config.h"
 #include "tracker_panel.h"
 
 enum TrackerFrameIds { ID_CONNECT = 1 };
@@ -64,6 +65,11 @@ void TrackerFrame::OnConnect(wxCommandEvent &event) {
   ConnectionDialog dlg;
 
   if (dlg.ShowModal() == wxID_OK) {
+    GetTrackerConfig().ap_server = dlg.GetServerValue();
+    GetTrackerConfig().ap_player = dlg.GetPlayerValue();
+    GetTrackerConfig().ap_password = dlg.GetPasswordValue();
+    GetTrackerConfig().Save();
+
     GetAPState().Connect(dlg.GetServerValue(), dlg.GetPlayerValue(),
                          dlg.GetPasswordValue());
   }

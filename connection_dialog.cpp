@@ -1,10 +1,15 @@
 #include "connection_dialog.h"
 
+#include "tracker_config.h"
+
 ConnectionDialog::ConnectionDialog()
     : wxDialog(nullptr, wxID_ANY, "Connect to Archipelago") {
-  server_box_ = new wxTextCtrl(this, -1, "", wxDefaultPosition, {300, -1});
-  player_box_ = new wxTextCtrl(this, -1, "", wxDefaultPosition, {300, -1});
-  password_box_ = new wxTextCtrl(this, -1, "", wxDefaultPosition, {300, -1});
+  server_box_ = new wxTextCtrl(this, -1, GetTrackerConfig().ap_server, wxDefaultPosition,
+                               {300, -1});
+  player_box_ = new wxTextCtrl(this, -1, GetTrackerConfig().ap_player, wxDefaultPosition,
+                               {300, -1});
+  password_box_ = new wxTextCtrl(this, -1, GetTrackerConfig().ap_password,
+                                 wxDefaultPosition, {300, -1});
 
   wxFlexGridSizer* form_sizer = new wxFlexGridSizer(2, 10, 10);
 
