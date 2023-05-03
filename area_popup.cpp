@@ -2,6 +2,7 @@
 
 #include "ap_state.h"
 #include "game_data.h"
+#include "tracker_state.h"
 
 AreaPopup::AreaPopup(wxWindow* parent, int area_id)
     : wxPanel(parent, wxID_ANY), area_id_(area_id) {
@@ -43,7 +44,9 @@ void AreaPopup::UpdateIndicators() {
   for (int section_id = 0; section_id < map_area.locations.size();
        section_id++) {
     bool checked = GetAPState().HasCheckedGameLocation(area_id_, section_id);
-    const wxColour* text_color = checked ? wxWHITE : wxGREEN;
+    bool reachable =
+        GetTrackerState().IsLocationReachable(area_id_, section_id);
+    const wxColour* text_color = reachable ? wxWHITE : wxRED;
 
     section_labels_[section_id]->SetForegroundColour(*text_color);
     eye_indicators_[section_id]->SetChecked(checked);

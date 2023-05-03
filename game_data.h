@@ -73,6 +73,16 @@ class GameData {
 
   const MapArea& GetMapArea(int id) const { return map_areas_.at(id); }
 
+  int GetRoomByName(const std::string& name) const {
+    return room_by_id_.at(name);
+  }
+
+  const Room& GetRoom(int room_id) const { return rooms_.at(room_id); }
+
+  const Door& GetDoor(int door_id) const { return doors_.at(door_id); }
+
+  const Panel& GetPanel(int panel_id) const { return panels_.at(panel_id); }
+
  private:
   int AddOrGetRoom(std::string room);
   int AddOrGetDoor(std::string room, std::string door);

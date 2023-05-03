@@ -9,12 +9,18 @@
 #include <thread>
 
 #include "game_data.h"
+#include "tracker_state.h"
 
 constexpr int AP_MAJOR = 0;
 constexpr int AP_MINOR = 4;
 constexpr int AP_REVISION = 0;
 
 constexpr int ITEM_HANDLING = 7;  // <- all
+
+NLOHMANN_JSON_SERIALIZE_ENUM(DoorShuffleMode,
+                             {{DoorShuffleMode::kNone, "none"},
+                              {DoorShuffleMode::kSimple, "simple"},
+                              {DoorShuffleMode::kComplex, "complex"}});
 
 APState::APState() {
   std::thread([this]() {
@@ -91,6 +97,9 @@ void APState::Connect(std::string server, std::string player,
 
   apclient_->set_slot_connected_handler([&](const nlohmann::json& slot_data) {
     tracker_frame_->SetStatusMessage("Connected to Archipelago!");
+
+    door_shuffle_mode_ = slot_data["shuffle_doors"].get<DoorShuffleMode>();
+    color_shuffle_ = slot_data["shuffle_colors"].get<bool>();
 
     connected = true;
     has_connection_result = true;
@@ -169,6 +178,16 @@ void APState::Connect(std::string server, std::string player,
       }
     }
 
+    ap_id_by_color_[LingoColor::kBlack] = GetItemId("Black");
+    ap_id_by_color_[LingoColor::kRed] = GetItemId("Red");
+    ap_id_by_color_[LingoColor::kBlue] = GetItemId("Blue");
+    ap_id_by_color_[LingoColor::kYellow] = GetItemId("Yellow");
+    ap_id_by_color_[LingoColor::kPurple] = GetItemId("Purple");
+    ap_id_by_color_[LingoColor::kOrange] = GetItemId("Orange");
+    ap_id_by_color_[LingoColor::kGreen] = GetItemId("Green");
+    ap_id_by_color_[LingoColor::kBrown] = GetItemId("Brown");
+    ap_id_by_color_[LingoColor::kGray] = GetItemId("Gray");
+
     RefreshTracker();
   } else {
     client_active_ = false;
@@ -185,7 +204,27 @@ bool APState::HasCheckedGameLocation(int area_id, int section_id) const {
   }
 }
 
-void APState::RefreshTracker() { tracker_frame_->UpdateIndicators(); }
+bool APState::HasColorItem(LingoColor color) const {
+  if (ap_id_by_color_.count(color)) {
+    return inventory_.count(ap_id_by_color_.at(color));
+  } else {
+    return false;
+  }
+}
+
+void APState::RefreshTracker() {
+  GetTrackerState().CalculateState();
+  tracker_frame_->UpdateIndicators();
+}
+
+int64_t APState::GetItemId(const std::string& item_name) {
+  int64_t ap_id = apclient_->get_item_id(item_name);
+  if (ap_id == APClient::INVALID_NAME_ID) {
+    std::cout << "Could not find AP item ID for " << item_name << std::endl;
+  }
+
+  return ap_id;
+}
 
 APState& GetAPState() {
   static APState* instance = new APState();

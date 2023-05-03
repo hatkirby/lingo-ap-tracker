@@ -4,6 +4,7 @@
 
 #include "ap_state.h"
 #include "game_data.h"
+#include "tracker_state.h"
 
 AreaWindow::AreaWindow(wxWindow* parent, int area_id, AreaPopup* popup)
     : wxWindow(parent, wxID_ANY), area_id_(area_id), popup_(popup) {
@@ -35,16 +36,25 @@ void AreaWindow::Redraw() {
   const wxBrush* brush_color = wxGREY_BRUSH;
 
   const MapArea& map_area = GetGameData().GetMapArea(area_id_);
-  int unchecked_sections = 0;
+  bool has_reachable_unchecked = false;
+  bool has_unreachable_unchecked = false;
   for (int section_id = 0; section_id < map_area.locations.size();
        section_id++) {
     if (!GetAPState().HasCheckedGameLocation(area_id_, section_id)) {
-      unchecked_sections++;
+      if (GetTrackerState().IsLocationReachable(area_id_, section_id)) {
+        has_reachable_unchecked = true;
+      } else {
+        has_unreachable_unchecked = true;
+      }
     }
   }
 
-  if (unchecked_sections > 0) {
+  if (has_reachable_unchecked && has_unreachable_unchecked) {
+    brush_color = wxYELLOW_BRUSH;
+  } else if (has_reachable_unchecked) {
     brush_color = wxGREEN_BRUSH;
+  } else if (has_unreachable_unchecked) {
+    brush_color = wxRED_BRUSH;
   }
 
   int actual_border_size = GetSize().GetWidth() * BORDER_SIZE / EFFECTIVE_SIZE;

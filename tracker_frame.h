@@ -9,6 +9,9 @@
 
 class TrackerPanel;
 
+wxDECLARE_EVENT(STATE_CHANGED, wxCommandEvent);
+wxDECLARE_EVENT(STATUS_CHANGED, wxCommandEvent);
+
 class TrackerFrame : public wxFrame {
  public:
   TrackerFrame();
@@ -21,6 +24,8 @@ class TrackerFrame : public wxFrame {
   void OnExit(wxCommandEvent &event);
   void OnAbout(wxCommandEvent &event);
   void OnConnect(wxCommandEvent &event);
+  void OnStateChanged(wxCommandEvent &event);
+  void OnStatusChanged(wxCommandEvent &event);
 
   TrackerPanel *tracker_panel_;
 };
