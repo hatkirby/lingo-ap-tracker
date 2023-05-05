@@ -181,6 +181,8 @@ void AP_Connect(std::string server, std::string player, std::string password) {
 
     connected = true;
     has_connection_result = true;
+
+    RefreshTracker();
   });
 
   apclient->set_slot_refused_handler([](const std::list<std::string>& errors) {
