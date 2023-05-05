@@ -30,16 +30,16 @@ include_directories(${SYSTEM_INCLUDE_DIR})
 link_directories(${openssl_LIBRARY_DIRS})
 
 add_executable(lingo_ap_tracker
-  main.cpp
-  tracker_frame.cpp
-  tracker_panel.cpp
-  game_data.cpp
-  area_popup.cpp
-  ap_state.cpp
-  connection_dialog.cpp
-  eye_indicator.cpp
-  tracker_state.cpp
-  tracker_config.cpp
+  "src/main.cpp"
+  "src/tracker_frame.cpp"
+  "src/tracker_panel.cpp"
+  "src/game_data.cpp"
+  "src/area_popup.cpp"
+  "src/ap_state.cpp"
+  "src/connection_dialog.cpp"
+  "src/eye_indicator.cpp"
+  "src/tracker_state.cpp"
+  "src/tracker_config.cpp"
 )
 set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD 20)
 set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD_REQUIRED ON)
