@@ -157,6 +157,14 @@ GameData::GameData() {
           panel_obj.check = panel_it.second["check"].as<bool>();
         }
 
+        if (panel_it.second["achievement"]) {
+          panel_obj.achievement = panel_it.second["achievement"].as<bool>();
+
+          if (panel_obj.achievement) {
+            achievement_panels_.push_back(panel_id);
+          }
+        }
+
         if (panel_it.second["exclude_reduce"]) {
           panel_obj.exclude_reduce =
               panel_it.second["exclude_reduce"].as<bool>();

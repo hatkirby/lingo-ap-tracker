@@ -16,6 +16,22 @@ bool IsPanelReachable_Helper(int panel_id,
     return false;
   }
 
+  if (panel_obj.name == "THE MASTER") {
+    int achievements_accessible = 0;
+
+    for (int achieve_id : GetGameData().GetAchievementPanels()) {
+      if (IsPanelReachable_Helper(achieve_id, reachable_rooms)) {
+        achievements_accessible++;
+
+        if (achievements_accessible >= AP_GetMasteryRequirement()) {
+          break;
+        }
+      }
+    }
+
+    return (achievements_accessible >= AP_GetMasteryRequirement());
+  }
+
   for (int room_id : panel_obj.required_rooms) {
     if (!reachable_rooms.count(room_id)) {
       return false;

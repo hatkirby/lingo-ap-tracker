@@ -105,6 +105,8 @@
     map: [908, 1632]
   The Wanderer:
     map: [1587, 1765]
+  Outside The Wanderer:
+    fold_into: The Wanderer
   Rhyme Room (Smiley):
     fold_into: Rhyme Room
   Rhyme Room (Cross):

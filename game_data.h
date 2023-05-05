@@ -28,6 +28,7 @@ struct Panel {
   std::vector<int> required_doors;
   bool check = false;
   bool exclude_reduce = false;
+  bool achievement = false;
 };
 
 struct ProgressiveRequirement {
@@ -104,6 +105,10 @@ class GameData {
     return room_by_painting_.at(painting_id);
   }
 
+  const std::vector<int>& GetAchievementPanels() const {
+    return achievement_panels_;
+  }
+
  private:
   int AddOrGetRoom(std::string room);
   int AddOrGetDoor(std::string room, std::string door);
@@ -121,6 +126,8 @@ class GameData {
   std::map<std::string, int> area_by_id_;
 
   std::map<std::string, int> room_by_painting_;
+
+  std::vector<int> achievement_panels_;
 };
 
 const GameData& GetGameData();

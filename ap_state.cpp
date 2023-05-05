@@ -52,6 +52,7 @@ std::map<int64_t, std::string> progressive_item_by_ap_id;
 DoorShuffleMode door_shuffle_mode = kNO_DOORS;
 bool color_shuffle = false;
 bool painting_shuffle = false;
+int mastery_requirement = 21;
 
 std::map<std::string, std::string> painting_mapping;
 
@@ -116,6 +117,7 @@ void AP_Connect(std::string server, std::string player, std::string password) {
   color_shuffle = false;
   painting_shuffle = false;
   painting_mapping.clear();
+  mastery_requirement = 21;
 
   connected = false;
   has_connection_result = false;
@@ -166,6 +168,7 @@ void AP_Connect(std::string server, std::string player, std::string password) {
     door_shuffle_mode = slot_data["shuffle_doors"].get<DoorShuffleMode>();
     color_shuffle = slot_data["shuffle_colors"].get<bool>();
     painting_shuffle = slot_data["shuffle_paintings"].get<bool>();
+    mastery_requirement = slot_data["mastery_achievements"].get<int>();
 
     if (painting_shuffle && slot_data.contains("painting_entrance_to_exit")) {
       painting_mapping.clear();
@@ -321,3 +324,5 @@ bool AP_IsPaintingShuffle() { return painting_shuffle; }
 const std::map<std::string, std::string> AP_GetPaintingMapping() {
   return painting_mapping;
 }
+
+int AP_GetMasteryRequirement() { return mastery_requirement; }
