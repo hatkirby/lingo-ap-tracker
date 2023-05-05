@@ -81,55 +81,14 @@ struct MapArea {
   int map_y;
 };
 
-class GameData {
- public:
-  GameData();
-
-  const std::vector<MapArea>& GetMapAreas() const { return map_areas_; }
-
-  const MapArea& GetMapArea(int id) const { return map_areas_.at(id); }
-
-  int GetRoomByName(const std::string& name) const {
-    return room_by_id_.at(name);
-  }
-
-  const Room& GetRoom(int room_id) const { return rooms_.at(room_id); }
-
-  const std::vector<Door>& GetDoors() const { return doors_; }
-
-  const Door& GetDoor(int door_id) const { return doors_.at(door_id); }
-
-  const Panel& GetPanel(int panel_id) const { return panels_.at(panel_id); }
-
-  int GetRoomForPainting(const std::string& painting_id) const {
-    return room_by_painting_.at(painting_id);
-  }
-
-  const std::vector<int>& GetAchievementPanels() const {
-    return achievement_panels_;
-  }
-
- private:
-  int AddOrGetRoom(std::string room);
-  int AddOrGetDoor(std::string room, std::string door);
-  int AddOrGetPanel(std::string room, std::string panel);
-  int AddOrGetArea(std::string area);
-
-  std::vector<Room> rooms_;
-  std::vector<Door> doors_;
-  std::vector<Panel> panels_;
-  std::vector<MapArea> map_areas_;
-
-  std::map<std::string, int> room_by_id_;
-  std::map<std::string, int> door_by_id_;
-  std::map<std::string, int> panel_by_id_;
-  std::map<std::string, int> area_by_id_;
-
-  std::map<std::string, int> room_by_painting_;
-
-  std::vector<int> achievement_panels_;
-};
-
-const GameData& GetGameData();
+const std::vector<MapArea>& GD_GetMapAreas();
+const MapArea& GD_GetMapArea(int id);
+int GD_GetRoomByName(const std::string& name);
+const Room& GD_GetRoom(int room_id);
+const std::vector<Door>& GD_GetDoors();
+const Door& GD_GetDoor(int door_id);
+const Panel& GD_GetPanel(int panel_id);
+int GD_GetRoomForPainting(const std::string& painting_id);
+const std::vector<int>& GD_GetAchievementPanels();
 
 #endif /* end of include guard: GAME_DATA_H_9C42AC51 */

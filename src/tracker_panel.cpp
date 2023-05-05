@@ -15,7 +15,7 @@ TrackerPanel::TrackerPanel(wxWindow *parent) : wxPanel(parent, wxID_ANY) {
     return;
   }
 
-  for (const MapArea &map_area : GetGameData().GetMapAreas()) {
+  for (const MapArea &map_area : GD_GetMapAreas()) {
     AreaIndicator area;
     area.area_id = map_area.id;
 
@@ -93,13 +93,13 @@ void TrackerPanel::Redraw() {
   for (AreaIndicator &area : areas_) {
     const wxBrush *brush_color = wxGREY_BRUSH;
 
-    const MapArea &map_area = GetGameData().GetMapArea(area.area_id);
+    const MapArea &map_area = GD_GetMapArea(area.area_id);
     bool has_reachable_unchecked = false;
     bool has_unreachable_unchecked = false;
     for (int section_id = 0; section_id < map_area.locations.size();
          section_id++) {
       if (!AP_HasCheckedGameLocation(area.area_id, section_id)) {
-        if (GetTrackerState().IsLocationReachable(area.area_id, section_id)) {
+        if (IsLocationReachable(area.area_id, section_id)) {
           has_reachable_unchecked = true;
         } else {
           has_unreachable_unchecked = true;

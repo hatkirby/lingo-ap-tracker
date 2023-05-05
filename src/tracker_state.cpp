@@ -1,16 +1,29 @@
 #include "tracker_state.h"
 
 #include <list>
+#include <map>
 #include <set>
+#include <tuple>
 
 #include "ap_state.h"
 #include "game_data.h"
+
+namespace {
+
+struct TrackerState {
+  std::map<std::tuple<int, int>, bool> reachability;
+};
+
+TrackerState& GetState() {
+  static TrackerState* instance = new TrackerState();
+  return *instance;
+}
 
 bool IsDoorReachable_Helper(int door_id, const std::set<int>& reachable_rooms);
 
 bool IsPanelReachable_Helper(int panel_id,
                              const std::set<int>& reachable_rooms) {
-  const Panel& panel_obj = GetGameData().GetPanel(panel_id);
+  const Panel& panel_obj = GD_GetPanel(panel_id);
 
   if (!reachable_rooms.count(panel_obj.room)) {
     return false;
@@ -19,7 +32,7 @@ bool IsPanelReachable_Helper(int panel_id,
   if (panel_obj.name == "THE MASTER") {
     int achievements_accessible = 0;
 
-    for (int achieve_id : GetGameData().GetAchievementPanels()) {
+    for (int achieve_id : GD_GetAchievementPanels()) {
       if (IsPanelReachable_Helper(achieve_id, reachable_rooms)) {
         achievements_accessible++;
 
@@ -56,7 +69,7 @@ bool IsPanelReachable_Helper(int panel_id,
 }
 
 bool IsDoorReachable_Helper(int door_id, const std::set<int>& reachable_rooms) {
-  const Door& door_obj = GetGameData().GetDoor(door_id);
+  const Door& door_obj = GD_GetDoor(door_id);
 
   if (AP_GetDoorShuffleMode() == kNO_DOORS || door_obj.skip_item) {
     if (!reachable_rooms.count(door_obj.room)) {
@@ -89,14 +102,15 @@ bool IsDoorReachable_Helper(int door_id, const std::set<int>& reachable_rooms) {
   }
 }
 
-void TrackerState::CalculateState() {
-  reachability_.clear();
+}  // namespace
+
+void RecalculateReachability() {
+  GetState().reachability.clear();
 
   std::set<int> reachable_rooms;
 
   std::list<Exit> flood_boundary;
-  flood_boundary.push_back(
-      {.destination_room = GetGameData().GetRoomByName("Menu")});
+  flood_boundary.push_back({.destination_room = GD_GetRoomByName("Menu")});
 
   bool reachable_changed = true;
   while (reachable_changed) {
@@ -123,8 +137,7 @@ void TrackerState::CalculateState() {
         reachable_rooms.insert(room_exit.destination_room);
         reachable_changed = true;
 
-        const Room& room_obj =
-            GetGameData().GetRoom(room_exit.destination_room);
+        const Room& room_obj = GD_GetRoom(room_exit.destination_room);
         for (const Exit& out_edge : room_obj.exits) {
           if (!out_edge.painting || !AP_IsPaintingShuffle()) {
             new_boundary.push_back(out_edge);
@@ -135,7 +148,7 @@ void TrackerState::CalculateState() {
           for (const PaintingExit& out_edge : room_obj.paintings) {
             if (AP_GetPaintingMapping().count(out_edge.id)) {
               Exit painting_exit;
-              painting_exit.destination_room = GetGameData().GetRoomForPainting(
+              painting_exit.destination_room = GD_GetRoomForPainting(
                   AP_GetPaintingMapping().at(out_edge.id));
               painting_exit.door = out_edge.door;
 
@@ -149,7 +162,7 @@ void TrackerState::CalculateState() {
     flood_boundary = new_boundary;
   }
 
-  for (const MapArea& map_area : GetGameData().GetMapAreas()) {
+  for (const MapArea& map_area : GD_GetMapAreas()) {
     for (int section_id = 0; section_id < map_area.locations.size();
          section_id++) {
       const Location& location_section = map_area.locations.at(section_id);
@@ -160,22 +173,17 @@ void TrackerState::CalculateState() {
         }
       }
 
-      reachability_[{map_area.id, section_id}] = reachable;
+      GetState().reachability[{map_area.id, section_id}] = reachable;
     }
   }
 }
 
-bool TrackerState::IsLocationReachable(int area_id, int section_id) {
+bool IsLocationReachable(int area_id, int section_id) {
   std::tuple<int, int> key = {area_id, section_id};
 
-  if (reachability_.count(key)) {
-    return reachability_.at(key);
+  if (GetState().reachability.count(key)) {
+    return GetState().reachability.at(key);
   } else {
     return false;
   }
-}
-
-TrackerState& GetTrackerState() {
-  static TrackerState* instance = new TrackerState();
-  return *instance;
 }

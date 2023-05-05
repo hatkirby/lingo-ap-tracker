@@ -6,7 +6,7 @@
 
 AreaPopup::AreaPopup(wxWindow* parent, int area_id)
     : wxPanel(parent, wxID_ANY), area_id_(area_id) {
-  const MapArea& map_area = GetGameData().GetMapArea(area_id);
+  const MapArea& map_area = GD_GetMapArea(area_id);
 
   wxFlexGridSizer* section_sizer = new wxFlexGridSizer(2, 10, 10);
 
@@ -40,12 +40,11 @@ AreaPopup::AreaPopup(wxWindow* parent, int area_id)
 }
 
 void AreaPopup::UpdateIndicators() {
-  const MapArea& map_area = GetGameData().GetMapArea(area_id_);
+  const MapArea& map_area = GD_GetMapArea(area_id_);
   for (int section_id = 0; section_id < map_area.locations.size();
        section_id++) {
     bool checked = AP_HasCheckedGameLocation(area_id_, section_id);
-    bool reachable =
-        GetTrackerState().IsLocationReachable(area_id_, section_id);
+    bool reachable = IsLocationReachable(area_id_, section_id);
     const wxColour* text_color = reachable ? wxWHITE : wxRED;
 
     section_labels_[section_id]->SetForegroundColour(*text_color);
