@@ -10,6 +10,7 @@
 #include <apuuid.hpp>
 #include <chrono>
 #include <exception>
+#include <filesystem>
 #include <list>
 #include <memory>
 #include <mutex>
@@ -25,6 +26,7 @@ constexpr int AP_MAJOR = 0;
 constexpr int AP_MINOR = 4;
 constexpr int AP_REVISION = 0;
 
+constexpr const char* CERT_STORE_PATH = "cacert.pem";
 constexpr int ITEM_HANDLING = 7;  // <- all
 
 namespace {
@@ -108,7 +110,12 @@ void AP_Connect(std::string server, std::string player, std::string password) {
       DestroyClient();
     }
 
-    apclient = new APClient(ap_get_uuid(""), "Lingo", server);
+    std::string cert_store = "";
+    if (std::filesystem::exists(CERT_STORE_PATH)) {
+      cert_store = CERT_STORE_PATH;
+    }
+
+    apclient = new APClient(ap_get_uuid(""), "Lingo", server, cert_store);
   }
 
   inventory.clear();
