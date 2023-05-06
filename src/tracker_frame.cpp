@@ -1,11 +1,17 @@
 #include "tracker_frame.h"
 
+#include <wx/webrequest.h>
+
+#include <nlohmann/json.hpp>
+#include <sstream>
+
 #include "ap_state.h"
 #include "connection_dialog.h"
 #include "tracker_config.h"
 #include "tracker_panel.h"
+#include "version.h"
 
-enum TrackerFrameIds { ID_CONNECT = 1 };
+enum TrackerFrameIds { ID_CONNECT = 1, ID_CHECK_FOR_UPDATES = 2 };
 
 wxDEFINE_EVENT(STATE_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(STATUS_CHANGED, wxCommandEvent);
@@ -25,6 +31,7 @@ TrackerFrame::TrackerFrame()
 
   wxMenu *menuHelp = new wxMenu();
   menuHelp->Append(wxID_ABOUT);
+  menuHelp->Append(ID_CHECK_FOR_UPDATES, "Check for Updates");
 
   wxMenuBar *menuBar = new wxMenuBar();
   menuBar->Append(menuFile, "&File");
@@ -38,10 +45,30 @@ TrackerFrame::TrackerFrame()
   Bind(wxEVT_MENU, &TrackerFrame::OnAbout, this, wxID_ABOUT);
   Bind(wxEVT_MENU, &TrackerFrame::OnExit, this, wxID_EXIT);
   Bind(wxEVT_MENU, &TrackerFrame::OnConnect, this, ID_CONNECT);
+  Bind(wxEVT_MENU, &TrackerFrame::OnCheckForUpdates, this,
+       ID_CHECK_FOR_UPDATES);
   Bind(STATE_CHANGED, &TrackerFrame::OnStateChanged, this);
   Bind(STATUS_CHANGED, &TrackerFrame::OnStatusChanged, this);
 
   tracker_panel_ = new TrackerPanel(this);
+
+  if (!GetTrackerConfig().asked_to_check_for_updates) {
+    GetTrackerConfig().asked_to_check_for_updates = true;
+
+    if (wxMessageBox(
+            "Check for updates automatically when the tracker is opened?",
+            "Lingo AP Tracker", wxYES_NO) == wxYES) {
+      GetTrackerConfig().should_check_for_updates = true;
+    } else {
+      GetTrackerConfig().should_check_for_updates = false;
+    }
+
+    GetTrackerConfig().Save();
+  }
+
+  if (GetTrackerConfig().should_check_for_updates) {
+    CheckForUpdates(/*manual=*/false);
+  }
 }
 
 void TrackerFrame::SetStatusMessage(std::string message) {
@@ -56,8 +83,12 @@ void TrackerFrame::UpdateIndicators() {
 }
 
 void TrackerFrame::OnAbout(wxCommandEvent &event) {
-  wxMessageBox("Lingo Archipelago Tracker by hatkirby",
-               "About lingo-ap-tracker", wxOK | wxICON_INFORMATION);
+  std::ostringstream message_text;
+  message_text << "Lingo Archipelago Tracker " << kTrackerVersion
+               << " by hatkirby";
+
+  wxMessageBox(message_text.str(), "About lingo-ap-tracker",
+               wxOK | wxICON_INFORMATION);
 }
 
 void TrackerFrame::OnExit(wxCommandEvent &event) { Close(true); }
@@ -76,6 +107,10 @@ void TrackerFrame::OnConnect(wxCommandEvent &event) {
   }
 }
 
+void TrackerFrame::OnCheckForUpdates(wxCommandEvent &event) {
+  CheckForUpdates(/*manual=*/true);
+}
+
 void TrackerFrame::OnStateChanged(wxCommandEvent &event) {
   tracker_panel_->UpdateIndicators();
   Refresh();
@@ -83,4 +118,64 @@ void TrackerFrame::OnStateChanged(wxCommandEvent &event) {
 
 void TrackerFrame::OnStatusChanged(wxCommandEvent &event) {
   SetStatusText(event.GetString());
+}
+
+void TrackerFrame::CheckForUpdates(bool manual) {
+  wxWebRequest request = wxWebSession::GetDefault().CreateRequest(
+      this,
+      "https://api.github.com/repos/hatkirby/lingo-ap-tracker/"
+      "releases?per_page=8");
+
+  if (!request.IsOk()) {
+    if (manual) {
+      wxMessageBox("Could not check for updates.", "Error",
+                   wxOK | wxICON_ERROR);
+    } else {
+      SetStatusText("Could not check for updates.");
+    }
+
+    return;
+  }
+
+  Bind(wxEVT_WEBREQUEST_STATE, [this, manual](wxWebRequestEvent &evt) {
+    if (evt.GetState() == wxWebRequest::State_Completed) {
+      std::string response = evt.GetResponse().AsString().ToStdString();
+      nlohmann::json parsed_response = nlohmann::json::parse(response);
+
+      if (parsed_response.is_array() && !parsed_response.empty()) {
+        // This will parse to 0.0.0 if it's invalid, which will always be older
+        // than our current version.
+        Version latest_version(
+            parsed_response[0]["tag_name"].get<std::string>());
+        if (kTrackerVersion < latest_version) {
+          std::ostringstream message_text;
+          message_text << "There is a newer version of Lingo AP Tracker "
+                          "available. You have "
+                       << kTrackerVersion << ", and the latest version is "
+                       << latest_version << ". Would you like to update?";
+
+          if (wxMessageBox(message_text.str(), "Update available", wxYES_NO) ==
+              wxYES) {
+            wxLaunchDefaultBrowser(
+                parsed_response[0]["html_url"].get<std::string>());
+          }
+        } else if (manual) {
+          wxMessageBox("Lingo AP Tracker is up to date!", "Lingo AP Tracker",
+                       wxOK);
+        }
+      } else if (manual) {
+        wxMessageBox("Lingo AP Tracker is up to date!", "Lingo AP Tracker",
+                     wxOK);
+      }
+    } else if (evt.GetState() == wxWebRequest::State_Failed) {
+      if (manual) {
+        wxMessageBox("Could not check for updates.", "Error",
+                     wxOK | wxICON_ERROR);
+      } else {
+        SetStatusText("Could not check for updates.");
+      }
+    }
+  });
+
+  request.Start();
 }

@@ -43,4 +43,4 @@ add_executable(lingo_ap_tracker
 )
 set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD 20)
 set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD_REQUIRED ON)
-target_link_libraries(lingo_ap_tracker PRIVATE OpenSSL::SSL OpenSSL::Crypto wx::core wx::base yaml-cpp)
+target_link_libraries(lingo_ap_tracker PRIVATE OpenSSL::SSL OpenSSL::Crypto wx::core wx::base wx::net yaml-cpp)

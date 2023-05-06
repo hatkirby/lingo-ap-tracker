@@ -24,8 +24,12 @@ class TrackerFrame : public wxFrame {
   void OnExit(wxCommandEvent &event);
   void OnAbout(wxCommandEvent &event);
   void OnConnect(wxCommandEvent &event);
+  void OnCheckForUpdates(wxCommandEvent &event);
+
   void OnStateChanged(wxCommandEvent &event);
   void OnStatusChanged(wxCommandEvent &event);
+
+  void CheckForUpdates(bool manual);
 
   TrackerPanel *tracker_panel_;
 };

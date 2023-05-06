@@ -12,6 +12,8 @@ class TrackerConfig {
   std::string ap_server;
   std::string ap_player;
   std::string ap_password;
+  bool asked_to_check_for_updates = false;
+  bool should_check_for_updates = false;
 };
 
 TrackerConfig& GetTrackerConfig();
