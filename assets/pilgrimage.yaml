@@ -1,0 +1,21 @@
+---
+  - room: Starting Room
+    door: Main Door
+  - room: Second Room
+    door: Exit Door
+  - room: Crossroads
+    door: Tower Entrance
+  - room: Orange Tower Fourth Floor
+    door: Hot Crusts Door
+  - room: Outside The Initiated
+    door: Shortcut to Hub Room
+  - room: Orange Tower First Floor
+    door: Shortcut to Hub Room
+  - room: Directional Gallery
+    door: Shortcut to The Undeterred
+  - room: Orange Tower First Floor
+    door: Salt Pepper Door
+  - room: The Tenacious
+    door: Shortcut to Hub Room
+  - room: Outside The Agreeable
+    door: Tenacious Entrance

@@ -50,6 +50,7 @@ struct GameData {
   GameData() {
     YAML::Node lingo_config = YAML::LoadFile("assets/LL1.yaml");
     YAML::Node areas_config = YAML::LoadFile("assets/areas.yaml");
+    YAML::Node pilgrimage_config = YAML::LoadFile("assets/pilgrimage.yaml");
 
     rooms_.reserve(lingo_config.size() * 2);
 
@@ -374,6 +375,29 @@ struct GameData {
                                       .panels = door.panels});
       }
     }
+
+    // Set up fake pilgrimage.
+    int fake_pilgrim_panel_id =
+        AddOrGetPanel("Starting Room", "!! Fake Pilgrimage Panel");
+    Panel &fake_pilgrim_panel_obj = panels_[fake_pilgrim_panel_id];
+
+    for (const auto &config_node : pilgrimage_config) {
+      fake_pilgrim_panel_obj.required_doors.push_back(
+          AddOrGetDoor(config_node["room"].as<std::string>(),
+                       config_node["door"].as<std::string>()));
+    }
+
+    int fake_pilgrim_door_id =
+        AddOrGetDoor("Starting Room", "!! Fake Pilgrimage Door");
+    Door &fake_pilgrim_door_obj = doors_[fake_pilgrim_door_id];
+    fake_pilgrim_door_obj.panels.push_back(fake_pilgrim_panel_id);
+    fake_pilgrim_door_obj.skip_item = true;
+
+    int starting_room_id = AddOrGetRoom("Starting Room");
+    Room &starting_room_obj = rooms_[starting_room_id];
+    starting_room_obj.exits.push_back(
+        Exit{.destination_room = AddOrGetRoom("Pilgrim Antechamber"),
+             .door = fake_pilgrim_door_id});
   }
 
   int AddOrGetRoom(std::string room) {
