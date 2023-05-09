@@ -30,4 +30,6 @@ const std::map<std::string, std::string> AP_GetPaintingMapping();
 
 int AP_GetMasteryRequirement();
 
+bool AP_IsReduceChecks();
+
 #endif /* end of include guard: AP_STATE_H_664A4180 */

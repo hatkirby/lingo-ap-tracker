@@ -71,6 +71,7 @@ struct Location {
   std::string ap_location_name;
   int room;
   std::vector<int> panels;
+  bool exclude_reduce = false;
 };
 
 struct MapArea {
@@ -79,6 +80,7 @@ struct MapArea {
   std::vector<Location> locations;
   int map_x;
   int map_y;
+  bool exclude_reduce = false;
 };
 
 const std::vector<MapArea>& GD_GetMapAreas();

@@ -43,6 +43,21 @@ void AreaPopup::UpdateIndicators() {
   const MapArea& map_area = GD_GetMapArea(area_id_);
   for (int section_id = 0; section_id < map_area.locations.size();
        section_id++) {
+    const Location& location = map_area.locations.at(section_id);
+    if (location.exclude_reduce) {
+      wxSizer* container_sizer =
+          section_labels_[section_id]->GetContainingSizer();
+
+      if (AP_IsReduceChecks()) {
+        container_sizer->Hide(section_labels_[section_id]);
+        container_sizer->Hide(eye_indicators_[section_id]);
+        continue;
+      } else {
+        container_sizer->Show(section_labels_[section_id]);
+        container_sizer->Show(eye_indicators_[section_id]);
+      }
+    }
+
     bool checked = AP_HasCheckedGameLocation(area_id_, section_id);
     bool reachable = IsLocationReachable(area_id_, section_id);
     const wxColour* text_color = reachable ? wxWHITE : wxRED;
@@ -50,4 +65,7 @@ void AreaPopup::UpdateIndicators() {
     section_labels_[section_id]->SetForegroundColour(*text_color);
     eye_indicators_[section_id]->SetChecked(checked);
   }
+
+  section_labels_[0]->GetContainingSizer()->Layout();
+  GetSizer()->Fit(this);
 }

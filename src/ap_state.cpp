@@ -56,6 +56,7 @@ struct APState {
   bool color_shuffle = false;
   bool painting_shuffle = false;
   int mastery_requirement = 21;
+  bool reduce_checks = false;
 
   std::map<std::string, std::string> painting_mapping;
 
@@ -102,6 +103,7 @@ struct APState {
     painting_shuffle = false;
     painting_mapping.clear();
     mastery_requirement = 21;
+    reduce_checks = false;
 
     connected = false;
     has_connection_result = false;
@@ -154,6 +156,8 @@ struct APState {
       color_shuffle = slot_data["shuffle_colors"].get<bool>();
       painting_shuffle = slot_data["shuffle_paintings"].get<bool>();
       mastery_requirement = slot_data["mastery_achievements"].get<int>();
+      reduce_checks = (door_shuffle_mode == kNO_DOORS) &&
+                      slot_data["reduce_checks"].get<bool>();
 
       if (painting_shuffle && slot_data.contains("painting_entrance_to_exit")) {
         painting_mapping.clear();
@@ -361,3 +365,5 @@ const std::map<std::string, std::string> AP_GetPaintingMapping() {
 }
 
 int AP_GetMasteryRequirement() { return GetState().mastery_requirement; }
+
+bool AP_IsReduceChecks() { return GetState().reduce_checks; }

@@ -343,7 +343,8 @@ struct GameData {
             {.name = panel.name,
              .ap_location_name = room_name + " - " + panel.name,
              .room = panel.room,
-             .panels = {panel.id}});
+             .panels = {panel.id},
+             .exclude_reduce = panel.exclude_reduce});
       }
     }
 
@@ -372,7 +373,21 @@ struct GameData {
         map_area.locations.push_back({.name = section_name,
                                       .ap_location_name = door.location_name,
                                       .room = door.room,
-                                      .panels = door.panels});
+                                      .panels = door.panels,
+                                      .exclude_reduce = door.exclude_reduce});
+      }
+    }
+
+    for (MapArea &map_area : map_areas_) {
+      bool all_exclude_reduce = true;
+      for (const Location &location : map_area.locations) {
+        if (!location.exclude_reduce) {
+          all_exclude_reduce = false;
+          break;
+        }
+      }
+      if (all_exclude_reduce) {
+        map_area.exclude_reduce = true;
       }
     }
 

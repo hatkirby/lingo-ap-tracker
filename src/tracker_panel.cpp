@@ -52,7 +52,8 @@ void TrackerPanel::OnPaint(wxPaintEvent &event) {
 
 void TrackerPanel::OnMouseMove(wxMouseEvent &event) {
   for (AreaIndicator &area : areas_) {
-    if (area.real_x1 <= event.GetX() && event.GetX() < area.real_x2 &&
+    if (area.active &&
+        area.real_x1 <= event.GetX() && event.GetX() < area.real_x2 &&
         area.real_y1 <= event.GetY() && event.GetY() < area.real_y2) {
       area.popup->Show();
     } else {
@@ -94,6 +95,13 @@ void TrackerPanel::Redraw() {
     const wxBrush *brush_color = wxGREY_BRUSH;
 
     const MapArea &map_area = GD_GetMapArea(area.area_id);
+    if (map_area.exclude_reduce && AP_IsReduceChecks()) {
+      area.active = false;
+      continue;
+    } else {
+      area.active = true;
+    }
+
     bool has_reachable_unchecked = false;
     bool has_unreachable_unchecked = false;
     for (int section_id = 0; section_id < map_area.locations.size();

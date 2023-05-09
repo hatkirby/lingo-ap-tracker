@@ -23,6 +23,7 @@ class TrackerPanel : public wxPanel {
     int real_y1 = 0;
     int real_x2 = 0;
     int real_y2 = 0;
+    bool active = true;
   };
  
   void OnPaint(wxPaintEvent &event);
