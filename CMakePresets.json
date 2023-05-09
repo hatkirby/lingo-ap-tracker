@@ -28,7 +28,15 @@
       "name": "lingo-ap-tracker-preset",
       "configurePreset": "lingo-ap-tracker-preset",
       "displayName": "Build lingo-ap-tracker-preset",
-      "description": "Build"
+      "description": "Build",
+      "configuration": "Debug"
+    },
+    {
+      "name": "x64-release-preset",
+      "displayName": "Release Build x64",
+      "description": "Build release x64",
+      "configurePreset": "lingo-ap-tracker-preset",
+      "configuration": "Release"
     }
   ]
 }
