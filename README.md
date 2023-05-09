@@ -1,0 +1,4 @@
+# Lingo Archipelago Tracker
+[Archipelago](https://archipelago.gg) is an open-source project that supports randomizing a number of different games and combining them into one cooperative experience. Items from each game are hidden in other games. For more information about Archipelago, you can look at their website. For more information about playing the game Lingo with Archipelago, see [hatkirby/lingo-archipelago](https://github.com/hatkirby/lingo-archipelago).
+
+This app is a tool that helps you keep track of your game state when playing Lingo as a part of an Archipelago multiworld. It shows a map of the world that, when connected to an Archipelago server, automatically updates to show you what areas you have access to and what locations can be checked / have already been checked. It supports all modes of play: door shuffle, color shuffle, and painting shuffle.
