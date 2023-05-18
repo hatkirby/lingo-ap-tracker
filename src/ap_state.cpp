@@ -19,6 +19,7 @@
 #include <tuple>
 
 #include "game_data.h"
+#include "logger.h"
 #include "tracker_frame.h"
 #include "tracker_state.h"
 
@@ -62,6 +63,8 @@ struct APState {
 
   void Connect(std::string server, std::string player, std::string password) {
     if (!initialized) {
+      TrackerLog("Initializing APState...");
+
       std::thread([this]() {
         for (;;) {
           {
@@ -79,8 +82,11 @@ struct APState {
     }
 
     tracker_frame->SetStatusMessage("Connecting to Archipelago server....");
+    TrackerLog("Connecting to Archipelago server (" + server + ")...");
 
     {
+      TrackerLog("Destroying old AP client...");
+
       std::lock_guard client_guard(client_mutex);
 
       if (apclient) {
@@ -111,6 +117,10 @@ struct APState {
     apclient->set_room_info_handler([this, player, password]() {
       inventory.clear();
 
+      TrackerLog("Connected to Archipelago server. Authenticating as " +
+                 player +
+                 (password.empty() ? " without password"
+                                   : " with password " + password));
       tracker_frame->SetStatusMessage(
           "Connected to Archipelago server. Authenticating...");
 
@@ -122,7 +132,7 @@ struct APState {
         [this](const std::list<int64_t>& locations) {
           for (const int64_t location_id : locations) {
             checked_locations.insert(location_id);
-            std::cout << "Location: " << location_id << std::endl;
+            TrackerLog("Location: " + std::to_string(location_id));
           }
 
           RefreshTracker();
@@ -131,18 +141,22 @@ struct APState {
     apclient->set_slot_disconnected_handler([this]() {
       tracker_frame->SetStatusMessage(
           "Disconnected from Archipelago. Attempting to reconnect...");
+      TrackerLog(
+          "Slot disconnected from Archipelago. Attempting to reconnect...");
     });
 
     apclient->set_socket_disconnected_handler([this]() {
       tracker_frame->SetStatusMessage(
           "Disconnected from Archipelago. Attempting to reconnect...");
+      TrackerLog(
+          "Socket disconnected from Archipelago. Attempting to reconnect...");
     });
 
     apclient->set_items_received_handler(
         [this](const std::list<APClient::NetworkItem>& items) {
           for (const APClient::NetworkItem& item : items) {
             inventory[item.item]++;
-            std::cout << "Item: " << item.item << std::endl;
+            TrackerLog("Item: " + std::to_string(item.item));
           }
 
           RefreshTracker();
@@ -151,6 +165,7 @@ struct APState {
     apclient->set_slot_connected_handler([this](
                                              const nlohmann::json& slot_data) {
       tracker_frame->SetStatusMessage("Connected to Archipelago!");
+      TrackerLog("Connected to Archipelago!");
 
       door_shuffle_mode = slot_data["shuffle_doors"].get<DoorShuffleMode>();
       color_shuffle = slot_data["shuffle_colors"].get<bool>();
@@ -206,6 +221,7 @@ struct APState {
           }
 
           std::string full_message = hatkirby::implode(error_messages, " ");
+          TrackerLog(full_message);
 
           wxMessageBox(full_message, "Connection failed", wxOK | wxICON_ERROR);
         });
@@ -224,6 +240,7 @@ struct APState {
 
         tracker_frame->SetStatusMessage("Disconnected from Archipelago.");
 
+        TrackerLog("Timeout while connecting to Archipelago server.");
         wxMessageBox("Timeout while connecting to Archipelago server.",
                      "Connection failed", wxOK | wxICON_ERROR);
       }
@@ -241,8 +258,8 @@ struct APState {
 
           int64_t ap_id = apclient->get_location_id(location.ap_location_name);
           if (ap_id == APClient::INVALID_NAME_ID) {
-            std::cout << "Could not find AP location ID for "
-                      << location.ap_location_name << std::endl;
+            TrackerLog("Could not find AP location ID for " +
+                       location.ap_location_name);
           } else {
             ap_id_by_location_id[{map_area.id, section_id}] = ap_id;
           }
@@ -309,6 +326,8 @@ struct APState {
   }
 
   void RefreshTracker() {
+    TrackerLog("Refreshing display...");
+
     RecalculateReachability();
     tracker_frame->UpdateIndicators();
   }
@@ -316,7 +335,7 @@ struct APState {
   int64_t GetItemId(const std::string& item_name) {
     int64_t ap_id = apclient->get_item_id(item_name);
     if (ap_id == APClient::INVALID_NAME_ID) {
-      std::cout << "Could not find AP item ID for " << item_name << std::endl;
+      TrackerLog("Could not find AP item ID for " + item_name);
     }
 
     return ap_id;
