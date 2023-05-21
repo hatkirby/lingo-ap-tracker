@@ -29,6 +29,7 @@ struct Panel {
   bool check = false;
   bool exclude_reduce = false;
   bool achievement = false;
+  std::string achievement_name;
 };
 
 struct ProgressiveRequirement {

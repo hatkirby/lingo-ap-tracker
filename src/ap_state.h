@@ -32,4 +32,6 @@ int AP_GetMasteryRequirement();
 
 bool AP_IsReduceChecks();
 
+bool AP_HasAchievement(const std::string& achievement_name);
+
 #endif /* end of include guard: AP_STATE_H_664A4180 */

@@ -45,8 +45,11 @@ struct APState {
   bool connected = false;
   bool has_connection_result = false;
 
+  std::list<std::string> tracked_data_storage_keys;
+
   std::map<int64_t, int> inventory;
   std::set<int64_t> checked_locations;
+  std::map<std::string, bool> data_storage;
 
   std::map<std::tuple<int, int>, int64_t> ap_id_by_location_id;
   std::map<std::string, int64_t> ap_id_by_item_name;
@@ -78,6 +81,11 @@ struct APState {
         }
       }).detach();
 
+      for (int panel_id : GD_GetAchievementPanels()) {
+        tracked_data_storage_keys.push_back(
+            "Achievement|" + GD_GetPanel(panel_id).achievement_name);
+      }
+
       initialized = true;
     }
 
@@ -104,6 +112,7 @@ struct APState {
 
     inventory.clear();
     checked_locations.clear();
+    data_storage.clear();
     door_shuffle_mode = kNO_DOORS;
     color_shuffle = false;
     painting_shuffle = false;
@@ -162,6 +171,31 @@ struct APState {
           RefreshTracker();
         });
 
+    apclient->set_retrieved_handler(
+        [this](const std::map<std::string, nlohmann::json>& data) {
+          for (const auto& [key, value] : data) {
+            if (value.is_boolean()) {
+              data_storage[key] = value.get<bool>();
+              TrackerLog("Data storage " + key + " retrieved as " +
+                         (value.get<bool>() ? "true" : "false"));
+            }
+          }
+
+          RefreshTracker();
+        });
+
+    apclient->set_set_reply_handler([this](const std::string& key,
+                                           const nlohmann::json& value,
+                                           const nlohmann::json&) {
+      if (value.is_boolean()) {
+        data_storage[key] = value.get<bool>();
+        TrackerLog("Data storage " + key + " set to " +
+                   (value.get<bool>() ? "true" : "false"));
+
+        RefreshTracker();
+      }
+    });
+
     apclient->set_slot_connected_handler([this](
                                              const nlohmann::json& slot_data) {
       tracker_frame->SetStatusMessage("Connected to Archipelago!");
@@ -187,6 +221,9 @@ struct APState {
       has_connection_result = true;
 
       RefreshTracker();
+
+      apclient->Get(tracked_data_storage_keys);
+      apclient->SetNotify(tracked_data_storage_keys);
     });
 
     apclient->set_slot_refused_handler(
@@ -325,6 +362,11 @@ struct APState {
     }
   }
 
+  bool HasAchievement(const std::string& name) {
+    std::string key = "Achievement|" + name;
+    return data_storage.count(key) && data_storage.at(key);
+  }
+
   void RefreshTracker() {
     TrackerLog("Refreshing display...");
 
@@ -386,3 +428,7 @@ const std::map<std::string, std::string> AP_GetPaintingMapping() {
 int AP_GetMasteryRequirement() { return GetState().mastery_requirement; }
 
 bool AP_IsReduceChecks() { return GetState().reduce_checks; }
+
+bool AP_HasAchievement(const std::string& achievement_name) {
+  return GetState().HasAchievement(achievement_name);
+}

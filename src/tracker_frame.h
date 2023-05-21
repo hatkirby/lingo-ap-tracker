@@ -7,6 +7,7 @@
 #include <wx/wx.h>
 #endif
 
+class AchievementsPane;
 class TrackerPanel;
 
 wxDECLARE_EVENT(STATE_CHANGED, wxCommandEvent);
@@ -32,6 +33,7 @@ class TrackerFrame : public wxFrame {
   void CheckForUpdates(bool manual);
 
   TrackerPanel *tracker_panel_;
+  AchievementsPane *achievements_pane_;
 };
 
 #endif /* end of include guard: TRACKER_FRAME_H_86BD8DFB */

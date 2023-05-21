@@ -39,6 +39,7 @@ add_executable(lingo_ap_tracker
   "src/tracker_state.cpp"
   "src/tracker_config.cpp"
   "src/logger.cpp"
+  "src/achievements_pane.cpp"
 )
 set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD 20)
 set_property(TARGET lingo_ap_tracker PROPERTY CXX_STANDARD_REQUIRED ON)

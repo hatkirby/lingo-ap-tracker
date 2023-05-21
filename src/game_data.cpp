@@ -177,11 +177,10 @@ struct GameData {
           }
 
           if (panel_it.second["achievement"]) {
-            panel_obj.achievement = panel_it.second["achievement"].as<bool>();
+            panel_obj.achievement = true;
+            panel_obj.achievement_name = panel_it.second["achievement"].as<std::string>();
 
-            if (panel_obj.achievement) {
-              achievement_panels_.push_back(panel_id);
-            }
+            achievement_panels_.push_back(panel_id);
           }
 
           if (panel_it.second["exclude_reduce"]) {

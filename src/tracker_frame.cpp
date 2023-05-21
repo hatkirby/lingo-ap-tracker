@@ -1,10 +1,12 @@
 #include "tracker_frame.h"
 
+#include <wx/choicebk.h>
 #include <wx/webrequest.h>
 
 #include <nlohmann/json.hpp>
 #include <sstream>
 
+#include "achievements_pane.h"
 #include "ap_state.h"
 #include "connection_dialog.h"
 #include "tracker_config.h"
@@ -50,7 +52,17 @@ TrackerFrame::TrackerFrame()
   Bind(STATE_CHANGED, &TrackerFrame::OnStateChanged, this);
   Bind(STATUS_CHANGED, &TrackerFrame::OnStatusChanged, this);
 
+  wxChoicebook *choicebook = new wxChoicebook(this, wxID_ANY);
+  achievements_pane_ = new AchievementsPane(this);
+  choicebook->AddPage(achievements_pane_, "Achievements");
+
   tracker_panel_ = new TrackerPanel(this);
+
+  wxBoxSizer *top_sizer = new wxBoxSizer(wxHORIZONTAL);
+  top_sizer->Add(choicebook, wxSizerFlags().Expand().Proportion(1));
+  top_sizer->Add(tracker_panel_, wxSizerFlags().Expand().Proportion(3));
+
+  SetSizerAndFit(top_sizer);
 
   if (!GetTrackerConfig().asked_to_check_for_updates) {
     GetTrackerConfig().asked_to_check_for_updates = true;
@@ -113,6 +125,7 @@ void TrackerFrame::OnCheckForUpdates(wxCommandEvent &event) {
 
 void TrackerFrame::OnStateChanged(wxCommandEvent &event) {
   tracker_panel_->UpdateIndicators();
+  achievements_pane_->UpdateIndicators();
   Refresh();
 }
 
