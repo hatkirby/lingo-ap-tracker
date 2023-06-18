@@ -51,6 +51,8 @@
     map: [1252, 1259]
   Orange Tower Seventh Floor:
     map: [1587, 1900]
+  Orange Tower Basement:
+    map: [1587, 2000]
   Courtyard:
     map: [863, 387]
   The Colorful:
