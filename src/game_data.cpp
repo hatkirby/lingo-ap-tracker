@@ -43,6 +43,8 @@ struct GameData {
   std::map<std::string, int> panel_by_id_;
   std::map<std::string, int> area_by_id_;
 
+  std::vector<int> door_definition_order_;
+
   std::map<std::string, int> room_by_painting_;
 
   std::vector<int> achievement_panels_;
@@ -194,6 +196,7 @@ struct GameData {
         for (const auto &door_it : room_it.second["doors"]) {
           int door_id =
               AddOrGetDoor(room_obj.name, door_it.first.as<std::string>());
+          door_definition_order_.push_back(door_id);
           Door &door_obj = doors_[door_id];
 
           bool has_external_panels = false;
@@ -347,7 +350,9 @@ struct GameData {
       }
     }
 
-    for (const Door &door : doors_) {
+    for (int door_id : door_definition_order_) {
+      const Door &door = doors_.at(door_id);
+
       if (!door.skip_location) {
         int room_id = door.room;
         std::string area_name = rooms_[room_id].name;
