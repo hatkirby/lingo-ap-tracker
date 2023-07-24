@@ -45,6 +45,7 @@ struct APState {
   bool connected = false;
   bool has_connection_result = false;
 
+  std::string data_storage_prefix;
   std::list<std::string> tracked_data_storage_keys;
 
   std::map<int64_t, int> inventory;
@@ -201,6 +202,8 @@ struct APState {
       tracker_frame->SetStatusMessage("Connected to Archipelago!");
       TrackerLog("Connected to Archipelago!");
 
+      data_storage_prefix =
+          "Lingo_" + std::to_string(apclient->get_player_number()) + "_";
       door_shuffle_mode = slot_data["shuffle_doors"].get<DoorShuffleMode>();
       color_shuffle = slot_data["shuffle_colors"].get<bool>();
       painting_shuffle = slot_data["shuffle_paintings"].get<bool>();
@@ -222,8 +225,13 @@ struct APState {
 
       RefreshTracker();
 
-      apclient->Get(tracked_data_storage_keys);
-      apclient->SetNotify(tracked_data_storage_keys);
+      std::list<std::string> corrected_keys;
+      for (const std::string& key : tracked_data_storage_keys) {
+        corrected_keys.push_back(data_storage_prefix + key);
+      }
+
+      apclient->Get(corrected_keys);
+      apclient->SetNotify(corrected_keys);
     });
 
     apclient->set_slot_refused_handler(
@@ -363,7 +371,7 @@ struct APState {
   }
 
   bool HasAchievement(const std::string& name) {
-    std::string key = "Achievement|" + name;
+    std::string key = data_storage_prefix + "Achievement|" + name;
     return data_storage.count(key) && data_storage.at(key);
   }
 
