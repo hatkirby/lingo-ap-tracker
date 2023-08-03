@@ -45,6 +45,25 @@ bool IsPanelReachable_Helper(int panel_id,
     return (achievements_accessible >= AP_GetMasteryRequirement());
   }
 
+  if (panel_obj.name == "LEVEL 2" && AP_GetVictoryCondition() == kLEVEL_2) {
+    int counting_panels_accessible = 0;
+
+    for (int reachable_room : reachable_rooms) {
+      const Room& room = GD_GetRoom(reachable_room);
+
+      for (int roomed_panel_id : room.panels) {
+        const Panel& roomed_panel = GD_GetPanel(roomed_panel_id);
+
+        if (!roomed_panel.non_counting &&
+            IsPanelReachable_Helper(roomed_panel_id, reachable_rooms)) {
+          counting_panels_accessible++;
+        }
+      }
+    }
+
+    return (counting_panels_accessible >= AP_GetLevel2Requirement());
+  }
+
   for (int room_id : panel_obj.required_rooms) {
     if (!reachable_rooms.count(room_id)) {
       return false;
@@ -53,6 +72,12 @@ bool IsPanelReachable_Helper(int panel_id,
 
   for (int door_id : panel_obj.required_doors) {
     if (!IsDoorReachable_Helper(door_id, reachable_rooms)) {
+      return false;
+    }
+  }
+
+  for (int panel_id : panel_obj.required_panels) {
+    if (!IsPanelReachable_Helper(panel_id, reachable_rooms)) {
       return false;
     }
   }

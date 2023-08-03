@@ -125,6 +125,7 @@ struct GameData {
           int panel_id =
               AddOrGetPanel(room_obj.name, panel_it.first.as<std::string>());
           Panel &panel_obj = panels_[panel_id];
+          room_obj.panels.push_back(panel_id);
 
           if (panel_it.second["colors"]) {
             if (panel_it.second["colors"].IsScalar()) {
@@ -174,6 +175,29 @@ struct GameData {
             }
           }
 
+          if (panel_it.second["required_panel"]) {
+            if (panel_it.second["required_panel"].IsMap()) {
+              std::string rp_room = room_obj.name;
+              if (panel_it.second["required_panel"]["room"]) {
+                rp_room = panel_it.second["required_panel"]["room"].as<std::string>();
+              }
+
+              panel_obj.required_panels.push_back(AddOrGetPanel(
+                  rp_room, panel_it.second["required_panel"]["panel"]
+                               .as<std::string>()));
+            } else {
+              for (const auto &rp_node : panel_it.second["required_panel"]) {
+                std::string rp_room = room_obj.name;
+                if (rp_node["room"]) {
+                  rp_room = rp_node["room"].as<std::string>();
+                }
+
+                panel_obj.required_panels.push_back(
+                    AddOrGetPanel(rp_room, rp_node["panel"].as<std::string>()));
+              }
+            }
+          }
+
           if (panel_it.second["check"]) {
             panel_obj.check = panel_it.second["check"].as<bool>();
           }
@@ -188,6 +212,10 @@ struct GameData {
           if (panel_it.second["exclude_reduce"]) {
             panel_obj.exclude_reduce =
                 panel_it.second["exclude_reduce"].as<bool>();
+          }
+
+          if (panel_it.second["non_counting"]) {
+            panel_obj.non_counting = panel_it.second["non_counting"].as<bool>();
           }
         }
       }

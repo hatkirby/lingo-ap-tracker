@@ -61,7 +61,9 @@ struct APState {
   bool color_shuffle = false;
   bool painting_shuffle = false;
   int mastery_requirement = 21;
+  int level_2_requirement = 223;
   bool reduce_checks = false;
+  VictoryCondition victory_condition = kTHE_END;
 
   std::map<std::string, std::string> painting_mapping;
 
@@ -119,7 +121,9 @@ struct APState {
     painting_shuffle = false;
     painting_mapping.clear();
     mastery_requirement = 21;
+    level_2_requirement = 223;
     reduce_checks = false;
+    victory_condition = kTHE_END;
 
     connected = false;
     has_connection_result = false;
@@ -208,8 +212,11 @@ struct APState {
       color_shuffle = slot_data["shuffle_colors"].get<bool>();
       painting_shuffle = slot_data["shuffle_paintings"].get<bool>();
       mastery_requirement = slot_data["mastery_achievements"].get<int>();
+      level_2_requirement = slot_data["level_2_requirement"].get<int>();
       reduce_checks = (door_shuffle_mode == kNO_DOORS) &&
                       slot_data["reduce_checks"].get<bool>();
+      victory_condition =
+          slot_data["victory_condition"].get<VictoryCondition>();
 
       if (painting_shuffle && slot_data.contains("painting_entrance_to_exit")) {
         painting_mapping.clear();
@@ -435,7 +442,13 @@ const std::map<std::string, std::string> AP_GetPaintingMapping() {
 
 int AP_GetMasteryRequirement() { return GetState().mastery_requirement; }
 
+int AP_GetLevel2Requirement() { return GetState().level_2_requirement; }
+
 bool AP_IsReduceChecks() { return GetState().reduce_checks; }
+
+VictoryCondition AP_GetVictoryCondition() {
+  return GetState().victory_condition;
+}
 
 bool AP_HasAchievement(const std::string& achievement_name) {
   return GetState().HasAchievement(achievement_name);

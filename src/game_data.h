@@ -26,10 +26,12 @@ struct Panel {
   std::vector<LingoColor> colors;
   std::vector<int> required_rooms;
   std::vector<int> required_doors;
+  std::vector<int> required_panels;
   bool check = false;
   bool exclude_reduce = false;
   bool achievement = false;
   std::string achievement_name;
+  bool non_counting = false;
 };
 
 struct ProgressiveRequirement {
@@ -65,6 +67,7 @@ struct Room {
   std::string name;
   std::vector<Exit> exits;
   std::vector<PaintingExit> paintings;
+  std::vector<int> panels;
 };
 
 struct Location {
