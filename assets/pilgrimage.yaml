@@ -15,6 +15,14 @@
     door: Shortcut to The Undeterred
   - room: Orange Tower First Floor
     door: Salt Pepper Door
+  - room: Hub Room
+    door: Crossroads Entrance
+  - room: Champion's Rest
+    door: Shortcut to The Steady
+  - room: The Bearer
+    door: Shortcut to The Bold
+  - room: Art Gallery
+    door: Exit
   - room: The Tenacious
     door: Shortcut to Hub Room
   - room: Outside The Agreeable
