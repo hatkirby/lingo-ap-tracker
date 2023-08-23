@@ -4,9 +4,11 @@
 #include <map>
 #include <set>
 #include <tuple>
+#include <sstream>
 
 #include "ap_state.h"
 #include "game_data.h"
+#include "logger.h"
 
 namespace {
 
@@ -151,7 +153,7 @@ void RecalculateReachability() {
       if (room_exit.door.has_value()) {
         if (IsDoorReachable_Helper(*room_exit.door, reachable_rooms)) {
           valid_transition = true;
-        } else if (AP_GetDoorShuffleMode() == kNO_DOORS) {
+        } else {
           new_boundary.push_back(room_exit);
         }
       } else {
