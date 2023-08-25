@@ -255,6 +255,7 @@ struct GameData {
           if (door_it.second["event"]) {
             door_obj.skip_location = door_it.second["event"].as<bool>();
             door_obj.skip_item = door_it.second["event"].as<bool>();
+            door_obj.is_event = door_it.second["event"].as<bool>();
           }
 
           if (door_it.second["item_name"]) {
@@ -427,6 +428,7 @@ struct GameData {
     int fake_pilgrim_panel_id =
         AddOrGetPanel("Starting Room", "!! Fake Pilgrimage Panel");
     Panel &fake_pilgrim_panel_obj = panels_[fake_pilgrim_panel_id];
+    fake_pilgrim_panel_obj.non_counting = true;
 
     for (const auto &config_node : pilgrimage_config) {
       fake_pilgrim_panel_obj.required_doors.push_back(
@@ -438,10 +440,13 @@ struct GameData {
         AddOrGetDoor("Starting Room", "!! Fake Pilgrimage Door");
     Door &fake_pilgrim_door_obj = doors_[fake_pilgrim_door_id];
     fake_pilgrim_door_obj.panels.push_back(fake_pilgrim_panel_id);
+    fake_pilgrim_door_obj.skip_location = true;
     fake_pilgrim_door_obj.skip_item = true;
+    fake_pilgrim_door_obj.is_event = true;
 
     int starting_room_id = AddOrGetRoom("Starting Room");
     Room &starting_room_obj = rooms_[starting_room_id];
+    starting_room_obj.panels.push_back(fake_pilgrim_panel_id);
     starting_room_obj.exits.push_back(
         Exit{.destination_room = AddOrGetRoom("Pilgrim Antechamber"),
              .door = fake_pilgrim_door_id});

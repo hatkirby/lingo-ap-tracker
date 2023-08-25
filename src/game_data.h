@@ -47,6 +47,7 @@ struct Door {
   std::string group_name;
   bool skip_location = false;
   bool skip_item = false;
+  bool is_event = false;
   std::vector<int> panels;
   bool exclude_reduce = true;
   std::vector<ProgressiveRequirement> progressives;

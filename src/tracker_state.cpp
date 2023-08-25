@@ -3,12 +3,11 @@
 #include <list>
 #include <map>
 #include <set>
-#include <tuple>
 #include <sstream>
+#include <tuple>
 
 #include "ap_state.h"
 #include "game_data.h"
-#include "logger.h"
 
 namespace {
 
@@ -16,103 +15,33 @@ struct TrackerState {
   std::map<std::tuple<int, int>, bool> reachability;
 };
 
+enum Decision { kYes, kNo, kMaybe };
+
 TrackerState& GetState() {
   static TrackerState* instance = new TrackerState();
   return *instance;
 }
 
-bool IsDoorReachable_Helper(int door_id, const std::set<int>& reachable_rooms);
-
-bool IsPanelReachable_Helper(int panel_id,
-                             const std::set<int>& reachable_rooms) {
-  const Panel& panel_obj = GD_GetPanel(panel_id);
-
-  if (!reachable_rooms.count(panel_obj.room)) {
-    return false;
-  }
-
-  if (panel_obj.name == "THE MASTER") {
-    int achievements_accessible = 0;
-
-    for (int achieve_id : GD_GetAchievementPanels()) {
-      if (IsPanelReachable_Helper(achieve_id, reachable_rooms)) {
-        achievements_accessible++;
-
-        if (achievements_accessible >= AP_GetMasteryRequirement()) {
-          break;
-        }
-      }
-    }
-
-    return (achievements_accessible >= AP_GetMasteryRequirement());
-  }
-
-  if (panel_obj.name == "LEVEL 2" && AP_GetVictoryCondition() == kLEVEL_2) {
-    int counting_panels_accessible = 0;
-
-    for (int reachable_room : reachable_rooms) {
-      const Room& room = GD_GetRoom(reachable_room);
-
-      for (int roomed_panel_id : room.panels) {
-        const Panel& roomed_panel = GD_GetPanel(roomed_panel_id);
-
-        if (!roomed_panel.non_counting &&
-            IsPanelReachable_Helper(roomed_panel_id, reachable_rooms)) {
-          counting_panels_accessible++;
-        }
-      }
-    }
-
-    return (counting_panels_accessible >= AP_GetLevel2Requirement());
-  }
-
-  for (int room_id : panel_obj.required_rooms) {
-    if (!reachable_rooms.count(room_id)) {
-      return false;
-    }
-  }
-
-  for (int door_id : panel_obj.required_doors) {
-    if (!IsDoorReachable_Helper(door_id, reachable_rooms)) {
-      return false;
-    }
-  }
-
-  for (int panel_id : panel_obj.required_panels) {
-    if (!IsPanelReachable_Helper(panel_id, reachable_rooms)) {
-      return false;
-    }
-  }
-
-  if (AP_IsColorShuffle()) {
-    for (LingoColor color : panel_obj.colors) {
-      if (!AP_HasColorItem(color)) {
-        return false;
-      }
-    }
-  }
-
-  return true;
-}
-
-bool IsDoorReachable_Helper(int door_id, const std::set<int>& reachable_rooms) {
+Decision IsDoorReachable_Helper(int door_id,
+                                const std::set<int>& reachable_rooms,
+                                const std::set<int>& solveable_panels) {
   const Door& door_obj = GD_GetDoor(door_id);
 
   if (AP_GetDoorShuffleMode() == kNO_DOORS || door_obj.skip_item) {
     if (!reachable_rooms.count(door_obj.room)) {
-      return false;
+      return kMaybe;
     }
 
     for (int panel_id : door_obj.panels) {
-      if (!IsPanelReachable_Helper(panel_id, reachable_rooms)) {
-        return false;
+      if (!solveable_panels.count(panel_id)) {
+        return kMaybe;
       }
     }
 
-    return true;
+    return kYes;
   } else if (AP_GetDoorShuffleMode() == kSIMPLE_DOORS &&
              !door_obj.group_name.empty()) {
-    return AP_HasItem(door_obj.group_name);
+    return AP_HasItem(door_obj.group_name) ? kYes : kNo;
   } else {
     bool has_item = AP_HasItem(door_obj.item_name);
 
@@ -125,8 +54,86 @@ bool IsDoorReachable_Helper(int door_id, const std::set<int>& reachable_rooms) {
       }
     }
 
-    return has_item;
+    return has_item ? kYes : kNo;
   }
+}
+
+Decision IsPanelReachable_Helper(int panel_id,
+                                 const std::set<int>& reachable_rooms,
+                                 const std::set<int>& solveable_panels) {
+  const Panel& panel_obj = GD_GetPanel(panel_id);
+
+  if (!reachable_rooms.count(panel_obj.room)) {
+    return kMaybe;
+  }
+
+  if (panel_obj.name == "THE MASTER") {
+    int achievements_accessible = 0;
+
+    for (int achieve_id : GD_GetAchievementPanels()) {
+      if (solveable_panels.count(achieve_id)) {
+        achievements_accessible++;
+
+        if (achievements_accessible >= AP_GetMasteryRequirement()) {
+          break;
+        }
+      }
+    }
+
+    return (achievements_accessible >= AP_GetMasteryRequirement()) ? kYes
+                                                                   : kMaybe;
+  }
+
+  if (panel_obj.name == "ANOTHER TRY" && AP_GetVictoryCondition() == kLEVEL_2) {
+    int counting_panels_accessible = 0;
+
+    for (int solved_panel_id : solveable_panels) {
+      const Panel& solved_panel = GD_GetPanel(solved_panel_id);
+
+      if (!solved_panel.non_counting) {
+        counting_panels_accessible++;
+      }
+    }
+
+    return (counting_panels_accessible >= AP_GetLevel2Requirement() - 1)
+               ? kYes
+               : kMaybe;
+  }
+
+  for (int room_id : panel_obj.required_rooms) {
+    if (!reachable_rooms.count(room_id)) {
+      return kMaybe;
+    }
+  }
+
+  for (int door_id : panel_obj.required_doors) {
+    Decision door_reachable =
+        IsDoorReachable_Helper(door_id, reachable_rooms, solveable_panels);
+    if (door_reachable == kNo) {
+      const Door& door_obj = GD_GetDoor(door_id);
+      return (door_obj.is_event || AP_GetDoorShuffleMode() == kNO_DOORS)
+                 ? kMaybe
+                 : kNo;
+    } else if (door_reachable == kMaybe) {
+      return kMaybe;
+    }
+  }
+
+  for (int panel_id : panel_obj.required_panels) {
+    if (!solveable_panels.count(panel_id)) {
+      return kMaybe;
+    }
+  }
+
+  if (AP_IsColorShuffle()) {
+    for (LingoColor color : panel_obj.colors) {
+      if (!AP_HasColorItem(color)) {
+        return kNo;
+      }
+    }
+  }
+
+  return kYes;
 }
 
 }  // namespace
@@ -135,13 +142,31 @@ void RecalculateReachability() {
   GetState().reachability.clear();
 
   std::set<int> reachable_rooms;
+  std::set<int> solveable_panels;
 
+  std::list<int> panel_boundary;
   std::list<Exit> flood_boundary;
   flood_boundary.push_back({.destination_room = GD_GetRoomByName("Menu")});
 
   bool reachable_changed = true;
   while (reachable_changed) {
     reachable_changed = false;
+
+    std::list<int> new_panel_boundary;
+    for (int panel_id : panel_boundary) {
+      if (solveable_panels.count(panel_id)) {
+        continue;
+      }
+
+      Decision panel_reachable =
+          IsPanelReachable_Helper(panel_id, reachable_rooms, solveable_panels);
+      if (panel_reachable == kYes) {
+        solveable_panels.insert(panel_id);
+        reachable_changed = true;
+      } else if (panel_reachable == kMaybe) {
+        new_panel_boundary.push_back(panel_id);
+      }
+    }
 
     std::list<Exit> new_boundary;
     for (const Exit& room_exit : flood_boundary) {
@@ -151,9 +176,11 @@ void RecalculateReachability() {
 
       bool valid_transition = false;
       if (room_exit.door.has_value()) {
-        if (IsDoorReachable_Helper(*room_exit.door, reachable_rooms)) {
+        Decision door_reachable = IsDoorReachable_Helper(
+            *room_exit.door, reachable_rooms, solveable_panels);
+        if (door_reachable == kYes) {
           valid_transition = true;
-        } else {
+        } else if (door_reachable == kMaybe) {
           new_boundary.push_back(room_exit);
         }
       } else {
@@ -183,20 +210,25 @@ void RecalculateReachability() {
             }
           }
         }
+
+        for (int panel_id : room_obj.panels) {
+          new_panel_boundary.push_back(panel_id);
+        }
       }
     }
 
     flood_boundary = new_boundary;
+    panel_boundary = new_panel_boundary;
   }
 
   for (const MapArea& map_area : GD_GetMapAreas()) {
-    for (int section_id = 0; section_id < map_area.locations.size();
+    for (size_t section_id = 0; section_id < map_area.locations.size();
          section_id++) {
       const Location& location_section = map_area.locations.at(section_id);
       bool reachable = reachable_rooms.count(location_section.room);
       if (reachable) {
         for (int panel_id : location_section.panels) {
-          reachable &= IsPanelReachable_Helper(panel_id, reachable_rooms);
+          reachable &= (solveable_panels.count(panel_id) == 1);
         }
       }
 
