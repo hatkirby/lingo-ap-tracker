@@ -19,6 +19,10 @@ enum class LingoColor {
   kGray
 };
 
+constexpr int kLOCATION_NORMAL = 1;
+constexpr int kLOCATION_REDUCED = 2;
+constexpr int kLOCATION_INSANITY = 4;
+
 struct Panel {
   int id;
   int room;
@@ -76,7 +80,7 @@ struct Location {
   std::string ap_location_name;
   int room;
   std::vector<int> panels;
-  bool exclude_reduce = false;
+  int classification = 0;
 };
 
 struct MapArea {
@@ -85,7 +89,7 @@ struct MapArea {
   std::vector<Location> locations;
   int map_x;
   int map_y;
-  bool exclude_reduce = false;
+  int classification = 0;
 };
 
 const std::vector<MapArea>& GD_GetMapAreas();

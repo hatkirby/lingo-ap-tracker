@@ -9,7 +9,7 @@
 
 #include "eye_indicator.h"
 
-class AreaPopup : public wxPanel {
+class AreaPopup : public wxScrolledWindow {
  public:
   AreaPopup(wxWindow* parent, int area_id);
 

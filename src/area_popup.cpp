@@ -5,7 +5,7 @@
 #include "tracker_state.h"
 
 AreaPopup::AreaPopup(wxWindow* parent, int area_id)
-    : wxPanel(parent, wxID_ANY), area_id_(area_id) {
+    : wxScrolledWindow(parent, wxID_ANY), area_id_(area_id) {
   const MapArea& map_area = GD_GetMapArea(area_id);
 
   wxFlexGridSizer* section_sizer = new wxFlexGridSizer(2, 10, 10);
@@ -34,6 +34,7 @@ AreaPopup::AreaPopup(wxWindow* parent, int area_id)
   top_sizer->Add(section_sizer, wxSizerFlags().DoubleBorder(wxALL).Expand());
 
   SetSizerAndFit(top_sizer);
+  SetScrollRate(5, 5);
 
   SetBackgroundColour(*wxBLACK);
   Hide();
@@ -44,18 +45,16 @@ void AreaPopup::UpdateIndicators() {
   for (int section_id = 0; section_id < map_area.locations.size();
        section_id++) {
     const Location& location = map_area.locations.at(section_id);
-    if (location.exclude_reduce) {
-      wxSizer* container_sizer =
-          section_labels_[section_id]->GetContainingSizer();
+    wxSizer* container_sizer =
+        section_labels_[section_id]->GetContainingSizer();
 
-      if (AP_IsReduceChecks()) {
-        container_sizer->Hide(section_labels_[section_id]);
-        container_sizer->Hide(eye_indicators_[section_id]);
-        continue;
-      } else {
-        container_sizer->Show(section_labels_[section_id]);
-        container_sizer->Show(eye_indicators_[section_id]);
-      }
+    if (!AP_IsLocationVisible(location.classification)) {
+      container_sizer->Hide(section_labels_[section_id]);
+      container_sizer->Hide(eye_indicators_[section_id]);
+      continue;
+    } else {
+      container_sizer->Show(section_labels_[section_id]);
+      container_sizer->Show(eye_indicators_[section_id]);
     }
 
     bool checked = AP_HasCheckedGameLocation(area_id_, section_id);

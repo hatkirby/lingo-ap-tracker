@@ -12,6 +12,8 @@ enum DoorShuffleMode { kNO_DOORS = 0, kSIMPLE_DOORS = 1, kCOMPLEX_DOORS = 2 };
 
 enum VictoryCondition { kTHE_END = 0, kTHE_MASTER = 1, kLEVEL_2 = 2 };
 
+enum LocationChecks { kNORMAL_LOCATIONS = 0, kREDUCED_LOCATIONS = 1, kPANELSANITY = 2 };
+
 void AP_SetTrackerFrame(TrackerFrame* tracker_frame);
 
 void AP_Connect(std::string server, std::string player, std::string password);
@@ -34,7 +36,7 @@ int AP_GetMasteryRequirement();
 
 int AP_GetLevel2Requirement();
 
-bool AP_IsReduceChecks();
+bool AP_IsLocationVisible(int classification);
 
 VictoryCondition AP_GetVictoryCondition();
 

@@ -52,9 +52,9 @@ void TrackerPanel::OnPaint(wxPaintEvent &event) {
 
 void TrackerPanel::OnMouseMove(wxMouseEvent &event) {
   for (AreaIndicator &area : areas_) {
-    if (area.active &&
-        area.real_x1 <= event.GetX() && event.GetX() < area.real_x2 &&
-        area.real_y1 <= event.GetY() && event.GetY() < area.real_y2) {
+    if (area.active && area.real_x1 <= event.GetX() &&
+        event.GetX() < area.real_x2 && area.real_y1 <= event.GetY() &&
+        event.GetY() < area.real_y2) {
       area.popup->Show();
     } else {
       area.popup->Hide();
@@ -95,7 +95,7 @@ void TrackerPanel::Redraw() {
     const wxBrush *brush_color = wxGREY_BRUSH;
 
     const MapArea &map_area = GD_GetMapArea(area.area_id);
-    if (map_area.exclude_reduce && AP_IsReduceChecks()) {
+    if (!AP_IsLocationVisible(map_area.classification)) {
       area.active = false;
       continue;
     } else {
@@ -106,7 +106,9 @@ void TrackerPanel::Redraw() {
     bool has_unreachable_unchecked = false;
     for (int section_id = 0; section_id < map_area.locations.size();
          section_id++) {
-      if (!AP_HasCheckedGameLocation(area.area_id, section_id)) {
+      if (AP_IsLocationVisible(
+              map_area.locations.at(section_id).classification) &&
+          !AP_HasCheckedGameLocation(area.area_id, section_id)) {
         if (IsLocationReachable(area.area_id, section_id)) {
           has_reachable_unchecked = true;
         } else {
@@ -146,6 +148,10 @@ void TrackerPanel::Redraw() {
         final_x + map_area.map_x * final_width / image_size.GetWidth();
     int popup_y =
         final_y + map_area.map_y * final_width / image_size.GetWidth();
+
+    area.popup->SetMaxSize(panel_size);
+    area.popup->GetSizer()->Fit(area.popup);
+
     if (popup_x + area.popup->GetSize().GetWidth() > panel_size.GetWidth()) {
       popup_x = panel_size.GetWidth() - area.popup->GetSize().GetWidth();
     }

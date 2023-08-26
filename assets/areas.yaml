@@ -9,12 +9,20 @@
     map: [1589, 1029]
   Hub Room:
     map: [1589, 924]
+  Dead End Area:
+    map: [1785, 1125]
   Pilgrim Room:
     map: [1493, 1564]
+  Pilgrim Antechamber:
+    fold_into: Pilgrim Room
   Crossroads:
     map: [1294, 720]
+  Lost Area:
+    fold_into: Crossroads
   Amen Name Area:
     fold_into: Crossroads
+  Suits Area:
+    map: [1566, 322]
   The Tenacious:
     map: [1589, 780]
   Warts Straw Area:
@@ -25,6 +33,12 @@
     map: [1766, 700]
   Hallway Room:
     map: [573, 1631]
+  Hallway Room (2):
+    fold_into: Hallway Room
+  Hallway Room (3):
+    fold_into: Hallway Room
+  Hallway Room (4):
+    fold_into: Hallway Room
   Dread Hallway:
     fold_into: Outside The Agreeable
   The Agreeable:
@@ -35,10 +49,16 @@
     map: [2251, 600]
   The Fearless:
     map: [1790, 2220]
+  The Fearless (First Floor):
+    fold_into: The Fearless
+  The Fearless (Second Floor):
+    fold_into: The Fearless
   The Observant:
     map: [2252, 193]
   The Incomparable:
     map: [2642, 872]
+  Eight Room:
+    fold_into: The Incomparable
   Orange Tower First Floor:
     map: [1285, 928]
   Color Hunt:
@@ -47,6 +67,8 @@
     map: [1935, 1575]
   Orange Tower Fourth Floor:
     map: [1365, 394]
+  Hot Crusts Area:
+    fold_into: Orange Tower Fourth Floor
   Orange Tower Fifth Floor:
     map: [1252, 1259]
   Orange Tower Seventh Floor:
@@ -55,8 +77,32 @@
     map: [1587, 2000]
   Courtyard:
     map: [863, 387]
+  First Second Third Fourth:
+    fold_into: Courtyard
+  Yellow Backside Area:
+    fold_into: Courtyard
   The Colorful:
     map: [863, 200]
+  The Colorful (Black):
+    fold_into: The Colorful
+  The Colorful (Blue):
+    fold_into: The Colorful
+  The Colorful (Brown):
+    fold_into: The Colorful
+  The Colorful (Gray):
+    fold_into: The Colorful
+  The Colorful (Green):
+    fold_into: The Colorful
+  The Colorful (Orange):
+    fold_into: The Colorful
+  The Colorful (Purple):
+    fold_into: The Colorful
+  The Colorful (Red):
+    fold_into: The Colorful
+  The Colorful (White):
+    fold_into: The Colorful
+  The Colorful (Yellow):
+    fold_into: The Colorful
   Welcome Back Area:
     map: [1472, 1233]
   Owl Hallway:
@@ -85,13 +131,73 @@
     map: [1845, 1883]
   The Bearer:
     map: [2155, 1764]
+  Bearer Side Area:
+    fold_into: The Bearer
+  The Bearer (East):
+    fold_into: The Bearer
+  The Bearer (North):
+    fold_into: The Bearer
+  The Bearer (South):
+    fold_into: The Bearer
+  The Bearer (West):
+    fold_into: The Bearer
   The Steady:
     map: [2121, 2182]
+  The Steady (Amber):
+    fold_into: The Steady
+  The Steady (Amethyst):
+    fold_into: The Steady
+  The Steady (Blueberry):
+    fold_into: The Steady
+  The Steady (Carnation):
+    fold_into: The Steady
+  The Steady (Cherry):
+    fold_into: The Steady
+  The Steady (Emerald):
+    fold_into: The Steady
+  The Steady (Lemon):
+    fold_into: The Steady
+  The Steady (Lilac):
+    fold_into: The Steady
+  The Steady (Lime):
+    fold_into: The Steady
+  The Steady (Orange):
+    fold_into: The Steady
+  The Steady (Plum):
+    fold_into: The Steady
+  The Steady (Rose):
+    fold_into: The Steady
+  The Steady (Ruby):
+    fold_into: The Steady
+  The Steady (Sapphire):
+    fold_into: The Steady
+  The Steady (Sunflower):
+    fold_into: The Steady
+  The Steady (Topaz):
+    fold_into: The Steady
   Knight Night Room:
     map: [1990, 1322]
+  Knight Night (Final):
+    fold_into: Knight Night Room
+  Knight Night (Outer Ring):
+    fold_into: Knight Night Room
+  Knight Night (Right Lower Segment):
+    fold_into: Knight Night Room
+  Knight Night (Right Upper Segment):
+    fold_into: Knight Night Room
+  Knight Night Exit:
+    fold_into: Knight Night Room
   The Artistic:
     map: [1151, 1793]
   The Artistic (Smiley):
+    fold_into: The Artistic
+  The Artistic (Apple):
+    fold_into: The Artistic
+  The Artistic (Hint Room):
+    fold_into: The Artistic
+  The Artistic (Lattice):
+    fold_into: The Artistic
+  The Artistic (Panda):
     fold_into: The Artistic
   The Discerning:
     map: [1098, 807]
@@ -99,10 +205,22 @@
     map: [972, 805]
   The Eyes They See:
     map: [955, 933]
+  Far Window:
+   fold_into: The Eyes They See
   Outside The Wondrous:
     map: [691, 524]
   The Wondrous:
     map: [648, 338]
+  The Wondrous (Bookcase):
+    fold_into: The Wondrous
+  The Wondrous (Chandelier):
+    fold_into: The Wondrous
+  The Wondrous (Table):
+    fold_into: The Wondrous
+  The Wondrous (Window):
+    fold_into: The Wondrous
+  Arrow Garden:
+    map: [555, 155]
   Elements Area:
     map: [908, 1632]
   The Wanderer:
@@ -117,8 +235,14 @@
     map: [1587, 1492]
   Rhyme Room (Target):
     fold_into: Rhyme Room
+  Rhyme Room (Circle):
+    fold_into: Rhyme Room
+  Rhyme Room (Looped Square):
+    fold_into: Rhyme Room
   Room Room:
     map: [2553, 2153]
+  Cellar:
+    fold_into: Room Room
   Outside The Wise:
     map: [1087, 1986]
   The Wise:
@@ -129,5 +253,13 @@
     map: [1368, 2103]
   Art Gallery:
     map: [2474, 1366]
+  Art Gallery (Second Floor):
+    fold_into: Art Gallery
+  Art Gallery (Third Floor):
+    fold_into: Art Gallery
+  Art Gallery (Fourth Floor):
+    fold_into: Art Gallery
   Challenge Room:
     map: [1486, 1357]
+  Roof:
+    map: [227, 1271]

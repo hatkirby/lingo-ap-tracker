@@ -62,7 +62,7 @@ struct APState {
   bool painting_shuffle = false;
   int mastery_requirement = 21;
   int level_2_requirement = 223;
-  bool reduce_checks = false;
+  LocationChecks location_checks = kNORMAL_LOCATIONS;
   VictoryCondition victory_condition = kTHE_END;
 
   std::map<std::string, std::string> painting_mapping;
@@ -122,7 +122,7 @@ struct APState {
     painting_mapping.clear();
     mastery_requirement = 21;
     level_2_requirement = 223;
-    reduce_checks = false;
+    location_checks = kNORMAL_LOCATIONS;
     victory_condition = kTHE_END;
 
     connected = false;
@@ -209,12 +209,11 @@ struct APState {
       data_storage_prefix =
           "Lingo_" + std::to_string(apclient->get_player_number()) + "_";
       door_shuffle_mode = slot_data["shuffle_doors"].get<DoorShuffleMode>();
-      color_shuffle = slot_data["shuffle_colors"].get<bool>();
-      painting_shuffle = slot_data["shuffle_paintings"].get<bool>();
+      color_shuffle = slot_data["shuffle_colors"].get<int>() == 1;
+      painting_shuffle = slot_data["shuffle_paintings"].get<int>() == 1;
       mastery_requirement = slot_data["mastery_achievements"].get<int>();
       level_2_requirement = slot_data["level_2_requirement"].get<int>();
-      reduce_checks = (door_shuffle_mode == kNO_DOORS) &&
-                      slot_data["reduce_checks"].get<bool>();
+      location_checks = slot_data["location_checks"].get<LocationChecks>();
       victory_condition =
           slot_data["victory_condition"].get<VictoryCondition>();
 
@@ -444,7 +443,16 @@ int AP_GetMasteryRequirement() { return GetState().mastery_requirement; }
 
 int AP_GetLevel2Requirement() { return GetState().level_2_requirement; }
 
-bool AP_IsReduceChecks() { return GetState().reduce_checks; }
+bool AP_IsLocationVisible(int classification) {
+  switch (GetState().location_checks) {
+    case kNORMAL_LOCATIONS:
+      return classification & kLOCATION_NORMAL;
+    case kREDUCED_LOCATIONS:
+      return classification & kLOCATION_REDUCED;
+    case kPANELSANITY:
+      return classification & kLOCATION_INSANITY;
+  }
+}
 
 VictoryCondition AP_GetVictoryCondition() {
   return GetState().victory_condition;

@@ -4,6 +4,9 @@
 #include <yaml-cpp/yaml.h>
 
 #include <iostream>
+#include <sstream>
+
+#include "logger.h"
 
 namespace {
 
@@ -48,6 +51,9 @@ struct GameData {
   std::map<std::string, int> room_by_painting_;
 
   std::vector<int> achievement_panels_;
+
+  bool loaded_area_data_ = false;
+  std::set<std::string> malconfigured_areas_;
 
   GameData() {
     YAML::Node lingo_config = YAML::LoadFile("assets/LL1.yaml");
@@ -179,7 +185,8 @@ struct GameData {
             if (panel_it.second["required_panel"].IsMap()) {
               std::string rp_room = room_obj.name;
               if (panel_it.second["required_panel"]["room"]) {
-                rp_room = panel_it.second["required_panel"]["room"].as<std::string>();
+                rp_room =
+                    panel_it.second["required_panel"]["room"].as<std::string>();
               }
 
               panel_obj.required_panels.push_back(AddOrGetPanel(
@@ -204,7 +211,8 @@ struct GameData {
 
           if (panel_it.second["achievement"]) {
             panel_obj.achievement = true;
-            panel_obj.achievement_name = panel_it.second["achievement"].as<std::string>();
+            panel_obj.achievement_name =
+                panel_it.second["achievement"].as<std::string>();
 
             achievement_panels_.push_back(panel_id);
           }
@@ -356,71 +364,88 @@ struct GameData {
       }
     }
 
+    loaded_area_data_ = true;
+
+    // Only locations for the panels are kept here.
+    std::map<std::string, std::tuple<int, int>> locations_by_name;
+
     for (const Panel &panel : panels_) {
-      if (panel.check) {
-        int room_id = panel.room;
-        std::string room_name = rooms_[room_id].name;
+      int room_id = panel.room;
+      std::string room_name = rooms_[room_id].name;
 
-        std::string area_name = room_name;
-        if (fold_areas.count(room_name)) {
-          int fold_area_id = fold_areas[room_name];
-          area_name = map_areas_[fold_area_id].name;
-        }
-
-        int area_id = AddOrGetArea(area_name);
-        MapArea &map_area = map_areas_[area_id];
-        // room field should be the original room ID
-        map_area.locations.push_back(
-            {.name = panel.name,
-             .ap_location_name = room_name + " - " + panel.name,
-             .room = panel.room,
-             .panels = {panel.id},
-             .exclude_reduce = panel.exclude_reduce});
+      std::string area_name = room_name;
+      if (fold_areas.count(room_name)) {
+        int fold_area_id = fold_areas[room_name];
+        area_name = map_areas_[fold_area_id].name;
       }
+
+      int classification = kLOCATION_INSANITY;
+      if (panel.check) {
+        classification |= kLOCATION_NORMAL;
+        if (!panel.exclude_reduce) {
+          classification |= kLOCATION_REDUCED;
+        }
+      }
+
+      int area_id = AddOrGetArea(area_name);
+      MapArea &map_area = map_areas_[area_id];
+      // room field should be the original room ID
+      map_area.locations.push_back(
+          {.name = panel.name,
+           .ap_location_name = room_name + " - " + panel.name,
+           .room = panel.room,
+           .panels = {panel.id},
+           .classification = classification});
+      locations_by_name[map_area.locations.back().ap_location_name] = {
+          area_id, map_area.locations.size() - 1};
     }
 
     for (int door_id : door_definition_order_) {
       const Door &door = doors_.at(door_id);
 
       if (!door.skip_location) {
-        int room_id = door.room;
-        std::string area_name = rooms_[room_id].name;
-        std::string section_name;
+        int classification = kLOCATION_NORMAL;
+        if (!door.exclude_reduce) {
+          classification |= kLOCATION_REDUCED;
+        }
 
-        size_t divider_pos = door.location_name.find(" - ");
-        if (divider_pos == std::string::npos) {
-          section_name = door.location_name;
+        if (locations_by_name.count(door.location_name)) {
+          auto [area_id, section_id] = locations_by_name[door.location_name];
+          map_areas_[area_id].locations[section_id].classification |=
+              classification;
         } else {
-          area_name = door.location_name.substr(0, divider_pos);
-          section_name = door.location_name.substr(divider_pos + 3);
-        }
+          int room_id = door.room;
+          std::string area_name = rooms_[room_id].name;
+          std::string section_name;
 
-        if (fold_areas.count(area_name)) {
-          int fold_area_id = fold_areas[area_name];
-          area_name = map_areas_[fold_area_id].name;
-        }
+          size_t divider_pos = door.location_name.find(" - ");
+          if (divider_pos == std::string::npos) {
+            section_name = door.location_name;
+          } else {
+            area_name = door.location_name.substr(0, divider_pos);
+            section_name = door.location_name.substr(divider_pos + 3);
+          }
 
-        int area_id = AddOrGetArea(area_name);
-        MapArea &map_area = map_areas_[area_id];
-        // room field should be the original room ID
-        map_area.locations.push_back({.name = section_name,
-                                      .ap_location_name = door.location_name,
-                                      .room = door.room,
-                                      .panels = door.panels,
-                                      .exclude_reduce = door.exclude_reduce});
+          if (fold_areas.count(area_name)) {
+            int fold_area_id = fold_areas[area_name];
+            area_name = map_areas_[fold_area_id].name;
+          }
+
+          int area_id = AddOrGetArea(area_name);
+          MapArea &map_area = map_areas_[area_id];
+          // room field should be the original room ID
+          map_area.locations.push_back({.name = section_name,
+                                        .ap_location_name = door.location_name,
+                                        .room = door.room,
+                                        .panels = door.panels,
+                                        .classification = classification});
+        }
       }
     }
 
     for (MapArea &map_area : map_areas_) {
-      bool all_exclude_reduce = true;
       for (const Location &location : map_area.locations) {
-        if (!location.exclude_reduce) {
-          all_exclude_reduce = false;
-          break;
-        }
-      }
-      if (all_exclude_reduce) {
-        map_area.exclude_reduce = true;
+        map_area.classification |= location.classification;
       }
     }
 
@@ -450,6 +475,13 @@ struct GameData {
     starting_room_obj.exits.push_back(
         Exit{.destination_room = AddOrGetRoom("Pilgrim Antechamber"),
              .door = fake_pilgrim_door_id});
+
+    // Report errors.
+    for (const std::string &area : malconfigured_areas_) {
+      std::ostringstream errstr;
+      errstr << "Area data not found for: " << area;
+      TrackerLog(errstr.str());
+    }
   }
 
   int AddOrGetRoom(std::string room) {
@@ -487,6 +519,10 @@ struct GameData {
 
   int AddOrGetArea(std::string area) {
     if (!area_by_id_.count(area)) {
+      if (loaded_area_data_) {
+        malconfigured_areas_.insert(area);
+      }
+
       int area_id = map_areas_.size();
       area_by_id_[area] = area_id;
       map_areas_.push_back({.id = area_id, .name = area});
