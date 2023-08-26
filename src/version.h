@@ -35,6 +35,6 @@ std::ostream& operator<<(std::ostream& out, const Version& ver) {
   return out << "v" << ver.major << "." << ver.minor << "." << ver.revision;
 }
 
-constexpr const Version kTrackerVersion = Version(0, 4, 5);
+constexpr const Version kTrackerVersion = Version(0, 5, 0);
 
 #endif /* end of include guard: VERSION_H_C757E53C */
