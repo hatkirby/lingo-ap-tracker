@@ -141,6 +141,14 @@
     fold_into: The Bearer
   The Bearer (West):
     fold_into: The Bearer
+  Cross Tower (East):
+    fold_into: The Bearer
+  Cross Tower (North):
+    fold_into: The Bearer
+  Cross Tower (South):
+    fold_into: The Bearer
+  Cross Tower (West):
+    fold_into: The Bearer
   The Steady:
     map: [2121, 2182]
   The Steady (Amber):
