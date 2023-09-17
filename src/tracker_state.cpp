@@ -12,7 +12,7 @@
 namespace {
 
 struct TrackerState {
-  std::map<std::tuple<int, int>, bool> reachability;
+  std::map<int, bool> reachability;
 };
 
 enum Decision { kYes, kNo, kMaybe };
@@ -41,13 +41,13 @@ Decision IsDoorReachable_Helper(int door_id,
     return kYes;
   } else if (AP_GetDoorShuffleMode() == kSIMPLE_DOORS &&
              !door_obj.group_name.empty()) {
-    return AP_HasItem(door_obj.group_name) ? kYes : kNo;
+    return AP_HasItem(door_obj.group_ap_item_id) ? kYes : kNo;
   } else {
-    bool has_item = AP_HasItem(door_obj.item_name);
+    bool has_item = AP_HasItem(door_obj.ap_item_id);
 
     if (!has_item) {
       for (const ProgressiveRequirement& prog_req : door_obj.progressives) {
-        if (AP_HasItem(prog_req.item_name, prog_req.quantity)) {
+        if (AP_HasItem(prog_req.ap_item_id, prog_req.quantity)) {
           has_item = true;
           break;
         }
@@ -127,7 +127,7 @@ Decision IsPanelReachable_Helper(int panel_id,
 
   if (AP_IsColorShuffle()) {
     for (LingoColor color : panel_obj.colors) {
-      if (!AP_HasColorItem(color)) {
+      if (!AP_HasItem(GD_GetItemIdForColor(color))) {
         return kNo;
       }
     }
@@ -232,16 +232,14 @@ void RecalculateReachability() {
         }
       }
 
-      GetState().reachability[{map_area.id, section_id}] = reachable;
+      GetState().reachability[location_section.ap_location_id] = reachable;
     }
   }
 }
 
-bool IsLocationReachable(int area_id, int section_id) {
-  std::tuple<int, int> key = {area_id, section_id};
-
-  if (GetState().reachability.count(key)) {
-    return GetState().reachability.at(key);
+bool IsLocationReachable(int location_id) {
+  if (GetState().reachability.count(location_id)) {
+    return GetState().reachability.at(location_id);
   } else {
     return false;
   }

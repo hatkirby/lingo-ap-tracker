@@ -104,12 +104,10 @@ void TrackerPanel::Redraw() {
 
     bool has_reachable_unchecked = false;
     bool has_unreachable_unchecked = false;
-    for (int section_id = 0; section_id < map_area.locations.size();
-         section_id++) {
-      if (AP_IsLocationVisible(
-              map_area.locations.at(section_id).classification) &&
-          !AP_HasCheckedGameLocation(area.area_id, section_id)) {
-        if (IsLocationReachable(area.area_id, section_id)) {
+    for (const Location &section : map_area.locations) {
+      if (AP_IsLocationVisible(section.classification) &&
+          !AP_HasCheckedGameLocation(section.ap_location_id)) {
+        if (IsLocationReachable(section.ap_location_id)) {
           has_reachable_unchecked = true;
         } else {
           has_unreachable_unchecked = true;

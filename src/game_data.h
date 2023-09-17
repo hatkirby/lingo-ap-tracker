@@ -36,10 +36,12 @@ struct Panel {
   bool achievement = false;
   std::string achievement_name;
   bool non_counting = false;
+  int ap_location_id = -1;
 };
 
 struct ProgressiveRequirement {
   std::string item_name;
+  int ap_item_id = -1;
   int quantity = 0;
 };
 
@@ -55,6 +57,9 @@ struct Door {
   std::vector<int> panels;
   bool exclude_reduce = true;
   std::vector<ProgressiveRequirement> progressives;
+  int ap_item_id = -1;
+  int group_ap_item_id = -1;
+  int ap_location_id = -1;
 };
 
 struct Exit {
@@ -78,6 +83,7 @@ struct Room {
 struct Location {
   std::string name;
   std::string ap_location_name;
+  int ap_location_id = -1;
   int room;
   std::vector<int> panels;
   int classification = 0;
@@ -101,5 +107,6 @@ const Door& GD_GetDoor(int door_id);
 const Panel& GD_GetPanel(int panel_id);
 int GD_GetRoomForPainting(const std::string& painting_id);
 const std::vector<int>& GD_GetAchievementPanels();
+int GD_GetItemIdForColor(LingoColor color);
 
 #endif /* end of include guard: GAME_DATA_H_9C42AC51 */

@@ -30,7 +30,10 @@ LingoColor GetColorForString(const std::string &str) {
   } else if (str == "purple") {
     return LingoColor::kPurple;
   } else {
-    std::cout << "Invalid color: " << str << std::endl;
+    std::ostringstream errmsg;
+    errmsg << "Invalid color: " << str;
+    TrackerLog(errmsg.str());
+
     return LingoColor::kNone;
   }
 }
@@ -52,6 +55,8 @@ struct GameData {
 
   std::vector<int> achievement_panels_;
 
+  std::map<LingoColor, int> ap_id_by_color_;
+
   bool loaded_area_data_ = false;
   std::set<std::string> malconfigured_areas_;
 
@@ -59,6 +64,31 @@ struct GameData {
     YAML::Node lingo_config = YAML::LoadFile("assets/LL1.yaml");
     YAML::Node areas_config = YAML::LoadFile("assets/areas.yaml");
     YAML::Node pilgrimage_config = YAML::LoadFile("assets/pilgrimage.yaml");
+    YAML::Node ids_config = YAML::LoadFile("assets/ids.yaml");
+
+    auto init_color_id = [this, &ids_config](const std::string &color_name) {
+      if (ids_config["special_items"] &&
+          ids_config["special_items"][color_name]) {
+        std::string input_name = color_name;
+        input_name[0] = std::tolower(input_name[0]);
+        ap_id_by_color_[GetColorForString(input_name)] =
+            ids_config["special_items"][color_name].as<int>();
+      } else {
+        std::ostringstream errmsg;
+        errmsg << "Missing AP item ID for color " << color_name;
+        TrackerLog(errmsg.str());
+      }
+    };
+
+    init_color_id("Black");
+    init_color_id("Red");
+    init_color_id("Blue");
+    init_color_id("Yellow");
+    init_color_id("Green");
+    init_color_id("Orange");
+    init_color_id("Purple");
+    init_color_id("Brown");
+    init_color_id("Gray");
 
     rooms_.reserve(lingo_config.size() * 2);
 
@@ -225,6 +255,17 @@ struct GameData {
           if (panel_it.second["non_counting"]) {
             panel_obj.non_counting = panel_it.second["non_counting"].as<bool>();
           }
+
+          if (ids_config["panels"] && ids_config["panels"][room_obj.name] &&
+              ids_config["panels"][room_obj.name][panel_obj.name]) {
+            panel_obj.ap_location_id =
+                ids_config["panels"][room_obj.name][panel_obj.name].as<int>();
+          } else {
+            std::ostringstream errmsg;
+            errmsg << "Missing AP location ID for panel " << room_obj.name
+                   << " - " << panel_obj.name;
+            TrackerLog(errmsg.str());
+          }
         }
       }
 
@@ -272,8 +313,34 @@ struct GameData {
             door_obj.item_name = room_obj.name + " - " + door_obj.name;
           }
 
+          if (!door_it.second["skip_item"] && !door_it.second["event"]) {
+            if (ids_config["doors"] && ids_config["doors"][room_obj.name] &&
+                ids_config["doors"][room_obj.name][door_obj.name] &&
+                ids_config["doors"][room_obj.name][door_obj.name]["item"]) {
+              door_obj.ap_item_id =
+                  ids_config["doors"][room_obj.name][door_obj.name]["item"]
+                      .as<int>();
+            } else {
+              std::ostringstream errmsg;
+              errmsg << "Missing AP item ID for door " << room_obj.name << " - "
+                     << door_obj.name;
+              TrackerLog(errmsg.str());
+            }
+          }
+
           if (door_it.second["group"]) {
             door_obj.group_name = door_it.second["group"].as<std::string>();
+
+            if (ids_config["door_groups"] &&
+                ids_config["door_groups"][door_obj.group_name]) {
+              door_obj.group_ap_item_id =
+                  ids_config["door_groups"][door_obj.group_name].as<int>();
+            } else {
+              std::ostringstream errmsg;
+              errmsg << "Missing AP item ID for door group "
+                     << door_obj.group_name;
+              TrackerLog(errmsg.str());
+            }
           }
 
           if (door_it.second["location_name"]) {
@@ -282,16 +349,32 @@ struct GameData {
           } else if (!door_it.second["skip_location"] &&
                      !door_it.second["event"]) {
             if (has_external_panels) {
-              std::cout
+              std::ostringstream errmsg;
+              errmsg
                   << room_obj.name << " - " << door_obj.name
                   << " has panels from other rooms but does not have an "
                      "explicit "
-                     "location name and is not marked skip_location or event"
-                  << std::endl;
+                     "location name and is not marked skip_location or event";
+              TrackerLog(errmsg.str());
             }
 
             door_obj.location_name =
                 room_obj.name + " - " + hatkirby::implode(panel_names, ", ");
+          }
+
+          if (!door_it.second["skip_location"] && !door_it.second["event"]) {
+            if (ids_config["doors"] && ids_config["doors"][room_obj.name] &&
+                ids_config["doors"][room_obj.name][door_obj.name] &&
+                ids_config["doors"][room_obj.name][door_obj.name]["location"]) {
+              door_obj.ap_location_id =
+                  ids_config["doors"][room_obj.name][door_obj.name]["location"]
+                      .as<int>();
+            } else {
+              std::ostringstream errmsg;
+              errmsg << "Missing AP location ID for door " << room_obj.name
+                     << " - " << door_obj.name;
+              TrackerLog(errmsg.str());
+            }
           }
 
           if (door_it.second["include_reduce"]) {
@@ -330,6 +413,18 @@ struct GameData {
           std::string progressive_item_name =
               progression_it.first.as<std::string>();
 
+          int progressive_item_id = -1;
+          if (ids_config["progression"] &&
+              ids_config["progression"][progressive_item_name]) {
+            progressive_item_id =
+                ids_config["progression"][progressive_item_name].as<int>();
+          } else {
+            std::ostringstream errmsg;
+            errmsg << "Missing AP item ID for progressive item "
+                   << progressive_item_name;
+            TrackerLog(errmsg.str());
+          }
+
           int index = 1;
           for (const auto &stage : progression_it.second) {
             int door_id = -1;
@@ -342,7 +437,9 @@ struct GameData {
             }
 
             doors_[door_id].progressives.push_back(
-                {.item_name = progressive_item_name, .quantity = index});
+                {.item_name = progressive_item_name,
+                 .ap_item_id = progressive_item_id,
+                 .quantity = index});
             index++;
           }
         }
@@ -393,6 +490,7 @@ struct GameData {
       map_area.locations.push_back(
           {.name = panel.name,
            .ap_location_name = room_name + " - " + panel.name,
+           .ap_location_id = panel.ap_location_id,
            .room = panel.room,
            .panels = {panel.id},
            .classification = classification});
@@ -436,6 +534,7 @@ struct GameData {
           // room field should be the original room ID
           map_area.locations.push_back({.name = section_name,
                                         .ap_location_name = door.location_name,
+                                        .ap_location_id = door.ap_location_id,
                                         .room = door.room,
                                         .panels = door.panels,
                                         .classification = classification});
@@ -563,4 +662,8 @@ int GD_GetRoomForPainting(const std::string &painting_id) {
 
 const std::vector<int> &GD_GetAchievementPanels() {
   return GetState().achievement_panels_;
+}
+
+int GD_GetItemIdForColor(LingoColor color) {
+  return GetState().ap_id_by_color_.at(color);
 }

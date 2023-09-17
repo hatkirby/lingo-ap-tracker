@@ -18,11 +18,9 @@ void AP_SetTrackerFrame(TrackerFrame* tracker_frame);
 
 void AP_Connect(std::string server, std::string player, std::string password);
 
-bool AP_HasCheckedGameLocation(int area_id, int section_id);
+bool AP_HasCheckedGameLocation(int location_id);
 
-bool AP_HasColorItem(LingoColor color);
-
-bool AP_HasItem(const std::string& item, int quantity = 1);
+bool AP_HasItem(int item_id, int quantity = 1);
 
 DoorShuffleMode AP_GetDoorShuffleMode();
 

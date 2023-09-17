@@ -57,8 +57,8 @@ void AreaPopup::UpdateIndicators() {
       container_sizer->Show(eye_indicators_[section_id]);
     }
 
-    bool checked = AP_HasCheckedGameLocation(area_id_, section_id);
-    bool reachable = IsLocationReachable(area_id_, section_id);
+    bool checked = AP_HasCheckedGameLocation(location.ap_location_id);
+    bool reachable = IsLocationReachable(location.ap_location_id);
     const wxColour* text_color = reachable ? wxWHITE : wxRED;
 
     section_labels_[section_id]->SetForegroundColour(*text_color);

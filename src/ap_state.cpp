@@ -52,11 +52,6 @@ struct APState {
   std::set<int64_t> checked_locations;
   std::map<std::string, bool> data_storage;
 
-  std::map<std::tuple<int, int>, int64_t> ap_id_by_location_id;
-  std::map<std::string, int64_t> ap_id_by_item_name;
-  std::map<LingoColor, int64_t> ap_id_by_color;
-  std::map<int64_t, std::string> progressive_item_by_ap_id;
-
   DoorShuffleMode door_shuffle_mode = kNO_DOORS;
   bool color_shuffle = false;
   bool painting_shuffle = false;
@@ -302,78 +297,18 @@ struct APState {
     }
 
     if (connected) {
-      for (const MapArea& map_area : GD_GetMapAreas()) {
-        for (int section_id = 0; section_id < map_area.locations.size();
-             section_id++) {
-          const Location& location = map_area.locations.at(section_id);
-
-          int64_t ap_id = apclient->get_location_id(location.ap_location_name);
-          if (ap_id == APClient::INVALID_NAME_ID) {
-            TrackerLog("Could not find AP location ID for " +
-                       location.ap_location_name);
-          } else {
-            ap_id_by_location_id[{map_area.id, section_id}] = ap_id;
-          }
-        }
-      }
-
-      for (const Door& door : GD_GetDoors()) {
-        if (!door.skip_item) {
-          ap_id_by_item_name[door.item_name] = GetItemId(door.item_name);
-
-          if (!door.group_name.empty() &&
-              !ap_id_by_item_name.count(door.group_name)) {
-            ap_id_by_item_name[door.group_name] = GetItemId(door.group_name);
-          }
-
-          for (const ProgressiveRequirement& prog_req : door.progressives) {
-            ap_id_by_item_name[prog_req.item_name] =
-                GetItemId(prog_req.item_name);
-          }
-        }
-      }
-
-      ap_id_by_color[LingoColor::kBlack] = GetItemId("Black");
-      ap_id_by_color[LingoColor::kRed] = GetItemId("Red");
-      ap_id_by_color[LingoColor::kBlue] = GetItemId("Blue");
-      ap_id_by_color[LingoColor::kYellow] = GetItemId("Yellow");
-      ap_id_by_color[LingoColor::kPurple] = GetItemId("Purple");
-      ap_id_by_color[LingoColor::kOrange] = GetItemId("Orange");
-      ap_id_by_color[LingoColor::kGreen] = GetItemId("Green");
-      ap_id_by_color[LingoColor::kBrown] = GetItemId("Brown");
-      ap_id_by_color[LingoColor::kGray] = GetItemId("Gray");
-
       RefreshTracker();
     } else {
       client_active = false;
     }
   }
 
-  bool HasCheckedGameLocation(int area_id, int section_id) {
-    std::tuple<int, int> location_key = {area_id, section_id};
-
-    if (ap_id_by_location_id.count(location_key)) {
-      return checked_locations.count(ap_id_by_location_id.at(location_key));
-    } else {
-      return false;
-    }
+  bool HasCheckedGameLocation(int location_id) {
+    return checked_locations.count(location_id);
   }
 
-  bool HasColorItem(LingoColor color) {
-    if (ap_id_by_color.count(color)) {
-      return inventory.count(ap_id_by_color.at(color));
-    } else {
-      return false;
-    }
-  }
-
-  bool HasItem(const std::string& item, int quantity) {
-    if (ap_id_by_item_name.count(item)) {
-      int64_t ap_id = ap_id_by_item_name.at(item);
-      return inventory.count(ap_id) && inventory.at(ap_id) >= quantity;
-    } else {
-      return false;
-    }
+  bool HasItem(int item_id, int quantity) {
+    return inventory.count(item_id) && inventory.at(item_id) >= quantity;
   }
 
   bool HasAchievement(const std::string& name) {
@@ -417,16 +352,12 @@ void AP_Connect(std::string server, std::string player, std::string password) {
   GetState().Connect(server, player, password);
 }
 
-bool AP_HasCheckedGameLocation(int area_id, int section_id) {
-  return GetState().HasCheckedGameLocation(area_id, section_id);
+bool AP_HasCheckedGameLocation(int location_id) {
+  return GetState().HasCheckedGameLocation(location_id);
 }
 
-bool AP_HasColorItem(LingoColor color) {
-  return GetState().HasColorItem(color);
-}
-
-bool AP_HasItem(const std::string& item, int quantity) {
-  return GetState().HasItem(item, quantity);
+bool AP_HasItem(int item_id, int quantity) {
+  return GetState().HasItem(item_id, quantity);
 }
 
 DoorShuffleMode AP_GetDoorShuffleMode() { return GetState().door_shuffle_mode; }
@@ -451,6 +382,8 @@ bool AP_IsLocationVisible(int classification) {
       return classification & kLOCATION_REDUCED;
     case kPANELSANITY:
       return classification & kLOCATION_INSANITY;
+    default:
+      return false;
   }
 }
 
