@@ -2,6 +2,7 @@
 
 #include <list>
 #include <map>
+#include <mutex>
 #include <set>
 #include <sstream>
 #include <tuple>
@@ -13,6 +14,7 @@ namespace {
 
 struct TrackerState {
   std::map<int, bool> reachability;
+  std::mutex reachability_mutex;
 };
 
 enum Decision { kYes, kNo, kMaybe };
@@ -139,8 +141,6 @@ Decision IsPanelReachable_Helper(int panel_id,
 }  // namespace
 
 void RecalculateReachability() {
-  GetState().reachability.clear();
-
   std::set<int> reachable_rooms;
   std::set<int> solveable_panels;
 
@@ -221,6 +221,7 @@ void RecalculateReachability() {
     panel_boundary = new_panel_boundary;
   }
 
+  std::map<int, bool> new_reachability;
   for (const MapArea& map_area : GD_GetMapAreas()) {
     for (size_t section_id = 0; section_id < map_area.locations.size();
          section_id++) {
@@ -232,12 +233,19 @@ void RecalculateReachability() {
         }
       }
 
-      GetState().reachability[location_section.ap_location_id] = reachable;
+      new_reachability[location_section.ap_location_id] = reachable;
     }
+  }
+
+  {
+    std::lock_guard reachability_guard(GetState().reachability_mutex);
+    std::swap(GetState().reachability, new_reachability);
   }
 }
 
 bool IsLocationReachable(int location_id) {
+  std::lock_guard reachability_guard(GetState().reachability_mutex);
+
   if (GetState().reachability.count(location_id)) {
     return GetState().reachability.at(location_id);
   } else {
