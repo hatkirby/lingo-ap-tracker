@@ -40,4 +40,6 @@ VictoryCondition AP_GetVictoryCondition();
 
 bool AP_HasAchievement(const std::string& achievement_name);
 
+bool AP_HasEarlyColorHallways();
+
 #endif /* end of include guard: AP_STATE_H_664A4180 */

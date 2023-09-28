@@ -59,6 +59,7 @@ struct APState {
   int level_2_requirement = 223;
   LocationChecks location_checks = kNORMAL_LOCATIONS;
   VictoryCondition victory_condition = kTHE_END;
+  bool early_color_hallways = false;
 
   std::map<std::string, std::string> painting_mapping;
 
@@ -119,6 +120,7 @@ struct APState {
     level_2_requirement = 223;
     location_checks = kNORMAL_LOCATIONS;
     victory_condition = kTHE_END;
+    early_color_hallways = false;
 
     connected = false;
     has_connection_result = false;
@@ -211,6 +213,8 @@ struct APState {
       location_checks = slot_data["location_checks"].get<LocationChecks>();
       victory_condition =
           slot_data["victory_condition"].get<VictoryCondition>();
+      early_color_hallways = slot_data.contains("early_color_hallways") &&
+                             slot_data["early_color_hallways"].get<int>() == 1;
 
       if (painting_shuffle && slot_data.contains("painting_entrance_to_exit")) {
         painting_mapping.clear();
@@ -394,3 +398,5 @@ VictoryCondition AP_GetVictoryCondition() {
 bool AP_HasAchievement(const std::string& achievement_name) {
   return GetState().HasAchievement(achievement_name);
 }
+
+bool AP_HasEarlyColorHallways() { return GetState().early_color_hallways; }

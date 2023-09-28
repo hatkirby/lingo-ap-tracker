@@ -148,6 +148,11 @@ void RecalculateReachability() {
   std::list<Exit> flood_boundary;
   flood_boundary.push_back({.destination_room = GD_GetRoomByName("Menu")});
 
+  if (AP_HasEarlyColorHallways()) {
+    flood_boundary.push_back(
+        {.destination_room = GD_GetRoomByName("Outside The Undeterred")});
+  }
+
   bool reachable_changed = true;
   while (reachable_changed) {
     reachable_changed = false;
